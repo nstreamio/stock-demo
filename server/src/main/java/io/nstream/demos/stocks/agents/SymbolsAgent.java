@@ -9,8 +9,8 @@ import swim.api.lane.JoinValueLane;
 import swim.structure.Value;
 import swim.uri.Uri;
 
-public class StocksAgent extends AbstractAgent {
-  private static final Logger log = LoggerFactory.getLogger(StocksAgent.class);
+public class SymbolsAgent extends AbstractAgent {
+  private static final Logger log = LoggerFactory.getLogger(SymbolsAgent.class);
   @SwimLane("stocks")
   final JoinValueLane<String, Value> stocks = this.<String, Value>joinValueLane();
 
@@ -19,6 +19,9 @@ public class StocksAgent extends AbstractAgent {
     log.debug("command = 'add' input: {}", input);
     String symbol = input.stringValue();
     Uri nodeUri = Uri.empty().path("/", "stocks", symbol);
-    this.stocks.downlink(symbol).nodeUri(nodeUri).laneUri("status").open();
+    this.stocks.downlink(symbol)
+        .nodeUri(nodeUri)
+        .laneUri("status")
+        .open();
   });
 }

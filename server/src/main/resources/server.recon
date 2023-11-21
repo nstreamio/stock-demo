@@ -520,8 +520,8 @@ tutorial: @fabric {
         @agent(class: "io.nstream.demos.stocks.agents.StockAgent")
     }
     @node {
-        pattern: "/stocks"
-        @agent(class: "io.nstream.demos.stocks.agents.StocksAgent")
+        pattern: "/symbols"
+        @agent(class: "io.nstream.demos.stocks.agents.SymbolsAgent")
     }
 
     @node {

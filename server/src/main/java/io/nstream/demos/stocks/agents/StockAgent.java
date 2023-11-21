@@ -102,7 +102,7 @@ public class StockAgent extends AbstractAgent {
   public void didStart() {
     this.status.set(Record.of());
 //    requestProfileData();
-    command("/stocks", "add", getProp("symbol"));
+    command("/symbols", "add", getProp("symbol"));
   }
 
   static class ValueBuilder {
