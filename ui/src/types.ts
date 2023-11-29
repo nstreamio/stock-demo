@@ -1,4 +1,4 @@
-export type PlayerChange = "none" | "rising" | "falling";
+export type ValueChange = "none" | "rising" | "falling";
 
 export type SymbolUpdate =
   | {
@@ -8,10 +8,10 @@ export type SymbolUpdate =
     }
   | undefined;
 
-export interface StockHistoryEntry {
-  open: number;
-  high: number;
-  low: number;
-  close: number;
-  volume: number;
-}
+// export interface StockHistoryEntry {
+//   open: number;
+//   high: number;
+//   low: number;
+//   close: number;
+//   volume: number;
+// }

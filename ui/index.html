@@ -73,20 +73,8 @@
         opacity: 1;
       }
 
-      .nameCell > span {
-        text-align: left;
-      }
-
-      .kdCell > span {
-        text-align: right;
-        padding-right: 12px;
-      }
-
-      .rising .kdCell > span, .falling .kdCell > span {
-        padding-right: 16px;
-      }
-
-      .rising .kdCell span::after, .falling .kdCell span::after {
+      .rising.priceCell span::after, .falling.priceCell span::after,
+      .rising.movementCell span::after, .falling.movementCell span::after {
         content: '';
         position: absolute;
         display: block;
@@ -98,10 +86,12 @@
         right: 0px;
         top: 18px;
       }
-      .rising .kdCell span::after {
+      .rising.priceCell span::after,
+      .rising.movementCell span::after {
         border-bottom: 8px solid var(--electric-teal);
       }
-      .falling .kdCell span::after {
+      .falling.priceCell span::after,
+      .falling.movementCell span::after {
         border-top: 8px solid var(--tangerine-scream);
       }
 
@@ -142,7 +132,6 @@ const bodyView = swim.HtmlView.fromNode(document.body).set({
     margin: '0',
   },
 });
-console.log('swim:', swim);
 
 // create base controller (AppController ? )
 const appController = new swim["stock-demo"].AppController();

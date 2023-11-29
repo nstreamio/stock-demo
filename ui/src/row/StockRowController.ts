@@ -11,12 +11,22 @@ import {
 } from "@swim/table";
 import { Observes } from "@swim/util";
 import { Uri } from "@swim/uri";
-import { MapDownlink, ValueDownlink } from "@swim/client";
+import { ValueDownlink } from "@swim/client";
 import { Value } from "@swim/structure";
-import { formatPrice } from "../helpers/stringFormatting";
-import { PlayerChange } from "../types";
+import { ValueChange } from "../types";
+import { Property } from "@swim/component";
 
 export class StockRowController extends RowController {
+  private _classRemovalTimers: {
+    price: NodeJS.Timeout | null;
+    volume: NodeJS.Timeout | null;
+    movement: NodeJS.Timeout | null;
+  } = {
+    price: null,
+    volume: null,
+    movement: null,
+  };
+
   constructor(trait: RowTrait, key: string) {
     super();
     this.trait.set(trait);
@@ -33,10 +43,6 @@ export class StockRowController extends RowController {
         .toString();
     }
     const nodeUri = `/stock/${this.key}`;
-
-    this.stockHistoryDownlink.setHostUri(host);
-    this.stockHistoryDownlink.setNodeUri(nodeUri);
-    this.stockHistoryDownlink.open();
 
     this.stockStatusDownlink.setHostUri(host);
     this.stockStatusDownlink.setNodeUri(nodeUri);
@@ -77,9 +83,7 @@ export class StockRowController extends RowController {
       return;
     },
   })
-  override readonly leaf!: TraitViewRef<this, LeafTrait, LeafView> &
-    Observes<LeafTrait> &
-    Observes<LeafView>;
+  override readonly leaf!: TraitViewRef<this, LeafTrait, LeafView> & Observes<LeafTrait> & Observes<LeafView>;
 
   @TraitRef({
     traitType: RowTrait,
@@ -101,9 +105,6 @@ export class StockRowController extends RowController {
           opacity: 0.9,
         },
       });
-      // if (this.owner.key) {
-      //   view.node.innerText = this.owner.key;
-      // }
     },
     extends: true,
   })
@@ -133,78 +134,6 @@ export class StockRowController extends RowController {
     initView(view): void {
       super.initView(view);
       view.set({
-        classList: ["openCell"],
-        style: {
-          fontSize: "14px",
-          color: "#FBFBFB",
-          opacity: 0.8,
-        },
-      });
-    },
-    extends: true,
-  })
-  readonly openCell!: TraitViewRef<this, TextCellTrait, TextCellView>;
-
-  @TraitViewRef({
-    traitType: TextCellTrait,
-    viewType: TextCellView,
-    initView(view): void {
-      super.initView(view);
-      view.set({
-        classList: ["highCell"],
-        style: {
-          fontSize: "14px",
-          color: "#FBFBFB",
-          opacity: 0.8,
-        },
-      });
-    },
-    extends: true,
-  })
-  readonly highCell!: TraitViewRef<this, TextCellTrait, TextCellView>;
-
-  @TraitViewRef({
-    traitType: TextCellTrait,
-    viewType: TextCellView,
-    initView(view): void {
-      super.initView(view);
-      view.set({
-        classList: ["lowCell"],
-        style: {
-          fontSize: "14px",
-          color: "#FBFBFB",
-          opacity: 0.8,
-        },
-      });
-    },
-    extends: true,
-  })
-  readonly lowCell!: TraitViewRef<this, TextCellTrait, TextCellView>;
-
-  @TraitViewRef({
-    traitType: TextCellTrait,
-    viewType: TextCellView,
-    initView(view): void {
-      super.initView(view);
-      view.set({
-        classList: ["closeCell"],
-        style: {
-          fontSize: "14px",
-          color: "#FBFBFB",
-          opacity: 0.8,
-        },
-      });
-    },
-    extends: true,
-  })
-  readonly closeCell!: TraitViewRef<this, TextCellTrait, TextCellView>;
-
-  @TraitViewRef({
-    traitType: TextCellTrait,
-    viewType: TextCellView,
-    initView(view): void {
-      super.initView(view);
-      view.set({
         classList: ["volumeCell"],
         style: {
           fontSize: "14px",
@@ -217,8 +146,26 @@ export class StockRowController extends RowController {
   })
   readonly volumeCell!: TraitViewRef<this, TextCellTrait, TextCellView>;
 
+  @TraitViewRef({
+    traitType: TextCellTrait,
+    viewType: TextCellView,
+    initView(view): void {
+      super.initView(view);
+      view.set({
+        classList: ["movementCell"],
+        style: {
+          fontSize: "14px",
+          color: "#FBFBFB",
+          opacity: 0.8,
+        },
+      });
+    },
+    extends: true,
+  })
+  readonly movementCell!: TraitViewRef<this, TextCellTrait, TextCellView>;
+
   // updateRow(
-  //   change: PlayerChange = "none"
+  //   change: ValueChange = "none"
   // ): void {
 
   //   if (change !== "none") {
@@ -231,132 +178,80 @@ export class StockRowController extends RowController {
   //   this.name.setValue(name);
   // }
 
-  /*
-
-  price, high, and low get change indication colors
-  */
-
   @ValueDownlink({
     laneUri: "status",
-    didSet(newValue, oldValue) {
-      const price = newValue.get("price").numberValue();
+    didSet(newRecord, oldRecord) {
+      (["price", "volume", "movement"] as ("price" | "volume" | "movement")[]).forEach((key) => {
+        // do not process empty or absent values
+        if (!newRecord.get(key).isDefinite()) {
+          return;
+        }
 
-      if (price !== undefined) {
-        this.owner.priceCell.attachTrait().set({
-          content: formatPrice(price),
-        });
-      }
+        const newValue = newRecord.get(key).stringValue("");
+        const oldValue = oldRecord.get(key).stringValue();
+
+        let content: string = "";
+        // apply appropriate text content formatting
+        switch (key) {
+          case "price": {
+            content = StockRowController.formatPrice(newValue);
+            break;
+          }
+          case "volume": {
+            content = StockRowController.formatVolume(newValue);
+            break;
+          }
+          case "movement": {
+            content = StockRowController.formatMovement(newValue);
+            break;
+          }
+        }
+        // update text content of cell
+        this.owner[`${key}Cell`].attachTrait().set({ content });
+
+        if (oldValue !== undefined && oldValue !== newValue) {
+          const change: ValueChange =
+            Number.parseFloat(oldValue) < Number.parseFloat(newValue) ? "rising" : "falling";
+          const cellView = this.owner[`${key}Cell` as "priceCell"].attachView();
+
+          // add styling which indicates whether value has increased or decreased
+          cellView.classList.remove(change === "rising" ? "falling" : "rising");
+          cellView.classList.add(change);
+
+          // cancel any existing timeout to modify this cell's classList
+          if (this.owner._classRemovalTimers[key] !== null) {
+            clearTimeout(this.owner._classRemovalTimers[key]!);
+          }
+          // set new timeout to remove "rising" or "falling" from this cell's classList
+          this.owner._classRemovalTimers[key] = setTimeout(function () {
+            cellView.classList.remove(change);
+          }, 2500);
+        }
+      });
     },
   })
   readonly stockStatusDownlink!: ValueDownlink<this, Value>;
 
-  @MapDownlink({
-    laneUri: "history",
-    didUpdate(key, newValue, oldValue) {
-      console.log("newValue:", newValue);
-      console.log("oldValue:", oldValue);
-      const open = newValue.get("open").numberValue();
-      const openPrev = oldValue.get("open").numberValue();
-      const high = newValue.get("high").numberValue();
-      const highPrev = oldValue.get("high").numberValue();
-      const low = newValue.get("low").numberValue();
-      const lowPrev = oldValue.get("low").numberValue();
-      const close = newValue.get("close").numberValue();
-      const closePrev = oldValue.get("close").numberValue();
-      const volume = newValue.get("volume").numberValue();
-      const volumePrev = oldValue.get("volume").numberValue();
-      console.log("this.owner.key:", this.owner.key);
-      console.log("volume:", volume);
-      console.log("volumePrev:", volumePrev);
+  static formatPrice(str: string): string {
+    return `$${Number.parseFloat(str).toFixed(2)}`;
+  }
 
-      const changes: Record<string, any> = {};
+  static formatVolume(str: string): string {
+    let intString = `${Number.parseFloat(str).toFixed(0)}`;
+    if (intString.length < 4) {
+      return intString;
+    }
 
-      if (open !== undefined) {
-        this.owner.openCell.attachTrait().set({
-          content: formatPrice(open),
-        });
-        if (openPrev !== undefined && openPrev !== open) {
-          const openChange: PlayerChange =
-            openPrev > open ? "rising" : "falling";
-          this.owner.openCell.attachView().classList.add(openChange);
-          changes.open = openChange;
-        }
-      }
-      if (high !== undefined) {
-        this.owner.highCell.attachTrait().set({
-          content: formatPrice(high),
-        });
-        if (highPrev !== undefined && highPrev !== high) {
-          const highChange: PlayerChange =
-            highPrev > high ? "rising" : "falling";
-          this.owner.highCell.attachView().classList.add(highChange);
-          changes.high = highChange;
-        }
-      }
-      if (low !== undefined) {
-        this.owner.lowCell.attachTrait().set({
-          content: formatPrice(low),
-        });
-        if (lowPrev !== undefined && lowPrev !== low) {
-          const lowChange: PlayerChange = lowPrev > low ? "rising" : "falling";
-          this.owner.lowCell.attachView().classList.add(lowChange);
-          changes.low = lowChange;
-        }
-      }
-      if (close !== undefined) {
-        this.owner.closeCell.attachTrait().set({
-          content: formatPrice(close),
-        });
-        if (closePrev !== undefined && closePrev !== close) {
-          const closeChange: PlayerChange =
-            closePrev > close ? "rising" : "falling";
-          this.owner.closeCell.attachView().classList.add(closeChange);
-          changes.close = closeChange;
-        }
-      }
-      if (volume !== undefined) {
-        console.log("volume is not undefined");
-        this.owner.volumeCell.attachTrait().set({
-          content: formatPrice(volume),
-        });
-        if (volumePrev !== undefined && volumePrev !== volume) {
-          console.log("volume value HAS changed");
-          const volumeChange: PlayerChange =
-            volumePrev > volume ? "rising" : "falling";
-          console.log("volumeChange type:", volumeChange);
-          this.owner.volumeCell.attachView().classList.add(volumeChange);
-          console.log(
-            "this.owner.volumeCell.attachView().classList:",
-            this.owner.volumeCell.attachView().classList
-          );
-          console.log(
-            "this.owner.volumeCell.attachView().classList.toString():",
-            this.owner.volumeCell.attachView().classList.toString()
-          );
-          changes.volume = volumeChange;
-        } else {
-          console.log("volume value has NOT changed");
-        }
-      } else {
-        console.log("volume is undefined");
-      }
+    // insert commas in the appropriate positions
+    let result = "";
+    do {
+      result = `${intString.length > 3 ? "," : ""}${intString.slice(-3)}${result}`;
+      intString = intString.slice(0, -3);
+    } while (intString.length);
+    return result;
+  }
 
-      if (!Object.keys(changes).length) {
-        return;
-      }
-
-      const that = this;
-      const timeoutCallback = function () {
-        console.log("timeoutCallback");
-        Object.entries(changes).forEach(function ([cellKey, className]) {
-          that.owner[`${cellKey}Cell` as "priceCell"]
-            .attachView()
-            .classList.remove(className);
-        });
-      };
-
-      setTimeout(timeoutCallback, 25000);
-    },
-  })
-  readonly stockHistoryDownlink!: MapDownlink<this, Value>;
+  static formatMovement(str: string): string {
+    return `${Number.parseFloat(str).toFixed(2)}%`;
+  }
 }

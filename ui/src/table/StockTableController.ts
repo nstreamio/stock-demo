@@ -9,7 +9,6 @@ import {
   HeaderTrait,
   HeaderView,
   RowController,
-  RowTrait,
   TableController,
   TableTrait,
   TableView,
@@ -24,7 +23,7 @@ import { Model } from "@swim/model";
 import { Property } from "@swim/component";
 import { StockRowView } from "../row/StockRowView";
 import { StockRowTrait } from "../row/StockRowTrait";
-import { PlayerChange, SymbolUpdate } from "../types";
+import { ValueChange, SymbolUpdate } from "../types";
 
 export class StockTableController extends TableController {
   _didSync: boolean = false;
@@ -48,7 +47,6 @@ export class StockTableController extends TableController {
     // set up and open status downlink
     this.symbolsDownlink.setHostUri(host);
     this.symbolsDownlink.setNodeUri(nodeUri);
-    console.log("about to open symbolsDownlink");
     this.symbolsDownlink.open();
   }
 
@@ -70,12 +68,7 @@ export class StockTableController extends TableController {
   @TraitViewControllerRef({
     extends: true,
   })
-  override readonly header!: TraitViewControllerRef<
-    this,
-    HeaderTrait,
-    HeaderView,
-    HeaderController
-  > &
+  override readonly header!: TraitViewControllerRef<this, HeaderTrait, HeaderView, HeaderController> &
     TableController["header"];
 
   @TraitViewControllerSet({
@@ -97,7 +90,6 @@ export class StockTableController extends TableController {
     },
     createController(trait) {
       const traitKey = trait?.key ?? "";
-      console.log("traitKey:", traitKey);
 
       if (trait && traitKey) {
         const stockRowController = new StockRowController(trait, traitKey);
@@ -108,12 +100,7 @@ export class StockTableController extends TableController {
       return super.createController(trait);
     },
   })
-  override readonly rows!: TraitViewControllerSet<
-    this,
-    StockRowTrait,
-    StockRowView,
-    StockRowController
-  > &
+  override readonly rows!: TraitViewControllerSet<this, StockRowTrait, StockRowView, StockRowController> &
     Observes<RowController> &
     TableController["rows"];
 
@@ -123,12 +110,11 @@ export class StockTableController extends TableController {
     didSet(value: SwimRecord): void {
       const obj = value.toObject() as SymbolUpdate;
       const symbol = obj?.["@update"]?.key ?? "";
-      console.log("symbol:", symbol);
 
       const rowController = this.owner.getChild(symbol, StockRowController);
 
       if (rowController) {
-        let change: PlayerChange = "none";
+        let change: ValueChange = "none";
 
         return;
       } else {
@@ -139,51 +125,40 @@ export class StockTableController extends TableController {
         // Create cells in trait before appending to model to display being set to 'none'
         const symbolCell = rowTrait.getOrCreateCell("symbol", TextCellTrait);
         const priceCell = rowTrait.getOrCreateCell("price", TextCellTrait);
-        const openCell = rowTrait.getOrCreateCell("open", TextCellTrait);
-        const highCell = rowTrait.getOrCreateCell("high", TextCellTrait);
-        const lowCell = rowTrait.getOrCreateCell("low", TextCellTrait);
-        const closeCell = rowTrait.getOrCreateCell("close", TextCellTrait);
         const volumeCell = rowTrait.getOrCreateCell("volume", TextCellTrait);
+        const movementCell = rowTrait.getOrCreateCell("movement", TextCellTrait);
 
         this.owner.tableModel.value.appendChild(rowModel);
 
-        const newStockRowController = Object.values(
-          this.owner.rows.controllers
-        ).find((c) => c?.key === symbol) as StockRowController | undefined;
+        const newStockRowController = Object.values(this.owner.rows.controllers).find(
+          (c) => c?.key === symbol
+        ) as StockRowController | undefined;
 
         if (newStockRowController) {
           newStockRowController.symbolCell.setTrait(symbolCell);
           newStockRowController.priceCell.setTrait(priceCell);
-          newStockRowController.openCell.setTrait(openCell);
-          newStockRowController.highCell.setTrait(highCell);
-          newStockRowController.lowCell.setTrait(lowCell);
-          newStockRowController.closeCell.setTrait(closeCell);
           newStockRowController.volumeCell.setTrait(volumeCell);
+          newStockRowController.movementCell.setTrait(movementCell);
 
-          ["symbol", "price", "open", "high", "low", "close", "volume"].forEach(
-            function (key) {
-              const view = Object.values(
-                newStockRowController.row.attachView().leaf.attachView().cells
-                  .views
-              ).find((v) => v?.key === key) as TextCellView | undefined;
-              if (view) {
-                (
-                  newStockRowController[
-                    `${key}Cell` as "priceCell"
-                  ] as TraitViewRef<
-                    StockRowController,
-                    TextCellTrait,
-                    TextCellView
-                  >
-                ).setView(view, null, key);
-              }
-              if (key === "symbol") {
-                newStockRowController.symbolCell.attachView().set({
-                  content: symbol,
-                });
-              }
+          ["symbol", "price", "volume", "movement"].forEach(function (key) {
+            const view = Object.values(
+              newStockRowController.row.attachView().leaf.attachView().cells.views
+            ).find((v) => v?.key === key) as TextCellView | undefined;
+            if (view) {
+              (
+                newStockRowController[`${key}Cell` as "priceCell"] as TraitViewRef<
+                  StockRowController,
+                  TextCellTrait,
+                  TextCellView
+                >
+              ).setView(view, null, key);
             }
-          );
+            if (key === "symbol") {
+              newStockRowController.symbolCell.attachView().set({
+                content: symbol,
+              });
+            }
+          });
         }
       }
     },

@@ -29,25 +29,13 @@ export class StockController extends BoardController {
       layout: { key: "price", grow: 3, textColor: Look.labelColor },
       label: "Price",
     });
-    tableTrait.appendTrait(TextColTrait, "open").set({
-      layout: { key: "open", grow: 3 },
-      label: "Open",
-    });
-    tableTrait.appendTrait(TextColTrait, "high").set({
-      layout: { key: "high", grow: 3, textColor: Look.labelColor },
-      label: "High",
-    });
-    tableTrait.appendTrait(TextColTrait, "low").set({
-      layout: { key: "low", grow: 3, textColor: Look.labelColor },
-      label: "Low",
-    });
-    tableTrait.appendTrait(TextColTrait, "close").set({
-      layout: { key: "close", grow: 3, textColor: Look.labelColor },
-      label: "Close",
-    });
     tableTrait.appendTrait(TextColTrait, "volume").set({
       layout: { key: "volume", grow: 4, textColor: Look.labelColor },
       label: "Volume",
+    });
+    tableTrait.appendTrait(TextColTrait, "movement").set({
+      layout: { key: "movement", grow: 3, textColor: Look.labelColor },
+      label: "Movement",
     });
 
     this.tableController.mount();
