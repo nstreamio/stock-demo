@@ -114,5 +114,13 @@ public class TwelveDataApiAgent extends AbstractAgent {
         this.client.profile(input);
       });
 
+  @SwimLane("eod")
+  final CommandLane<Value> eod = this.<Value>commandLane()
+      .onCommand(input -> {
+        this.executor.submit(()-> {
+          this.client.eod(input);
+        });
+      });
+
 
 }
