@@ -145,7 +145,10 @@ public class StockAgent extends AbstractAgent {
           if(null != closeValue&&closeValue.isDefined()) {
             double close = closeValue.doubleValue();
             double price = priceValue.doubleValue();
-            double movement = new BigDecimal((close / price)).setScale(3, RoundingMode.HALF_UP).doubleValue();
+            double movement = ((price - close) / close) * 100D;
+            movement = new BigDecimal(movement)
+                .setScale(3, RoundingMode.HALF_UP)
+                .doubleValue();
             movementValue = Value.fromObject(movement);
           } else {
             movementValue = Value.absent();
