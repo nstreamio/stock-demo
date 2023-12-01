@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "allowUmdGlobalAccess": true,
+    "alwaysStrict": true,
+    "composite": true,
+    "declaration": true,
+    "declarationMap": false,
+    "forceConsistentCasingInFileNames": true,
+    "importHelpers": true,
+    "incremental": true,
+    "module": "es2020",
+    "moduleResolution": "node",
+    "noEmitHelpers": true,
+    "noEmitOnError": true,
+    "noImplicitAny": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": false,
+    "outDir": "../build/typescript",
+    "preserveConstEnums": true,
+    "pretty": true,
+    "removeComments": true,
+    "sourceMap": true,
+    "strictBindCallApply": true,
+    "strictFunctionTypes": true,
+    "strictNullChecks": true,
+    "strictPropertyInitialization": true,
+    "target": "es2015",
+    "tsBuildInfoFile": "../build/tmp/.tsbuildinfo"
+  }
+}
