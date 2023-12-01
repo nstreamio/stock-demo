@@ -21,6 +21,9 @@ import java.net.http.HttpResponse;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -32,6 +35,7 @@ public class TwelveDataClient extends WebSocketClient {
   private final String token;
   private final HttpClient httpClient;
 
+  private final ScheduledExecutorService executorService;
   public TwelveDataClient(WarpRef warpRef, Uri nodeUri, String token) {
     super(URI.create(String.format("wss://ws.twelvedata.com/v1/quotes/price?apikey=%s", token)));
     this.warpRef = warpRef;
@@ -39,6 +43,15 @@ public class TwelveDataClient extends WebSocketClient {
     this.restApiUri = Uri.parse("https://api.twelvedata.com/");
     this.token = token;
     this.httpClient = HttpClient.newBuilder().build();
+    this.executorService = Executors.newScheduledThreadPool(1);
+    this.executorService.scheduleAtFixedRate(this::sendKeepAlive, 10, 10, TimeUnit.SECONDS);
+  }
+
+  void sendKeepAlive() {
+    sendValue(
+        Record.of()
+            .slot("action", "heartbeat")
+    );
   }
 
   @Override
@@ -96,9 +109,14 @@ public class TwelveDataClient extends WebSocketClient {
     }
   }
 
+  void handleHeartBeat(Value value) {
+
+  }
+
   final Map<String, Consumer<Value>> messageHandlers = Map.of(
       "subscribe-status", this::handleSubscribeStatus,
-      "price", this::handlePrice
+      "price", this::handlePrice,
+      "heartbeat", this::handleHeartBeat
   );
 
   AtomicInteger messagesPerSecond = new AtomicInteger(0);
@@ -132,7 +150,7 @@ public class TwelveDataClient extends WebSocketClient {
   Set<String> ignore = Set.of("nodeUri", "lane");
 
 
-  void processRequest(Uri requestUri, String nodeUri, String lane) throws IOException, InterruptedException {
+  void processRequest(Uri requestUri, Value input) throws IOException, InterruptedException {
     log.info("processRequest() - requestUri = '{}'", requestUri);
     Uri uri = requestUri.appendedQuery()
         .appendedQuery("apikey", this.token);
@@ -142,43 +160,52 @@ public class TwelveDataClient extends WebSocketClient {
         .build();
     HttpResponse<String> response = this.httpClient.send(request, HttpResponse.BodyHandlers.ofString());
     Value value = Json.parse(response.body());
+    String nodeUri = input.getSlot("nodeUri").stringValue();
+    String lane = input.getSlot("lane").stringValue();
     this.warpRef.command(nodeUri, lane, value);
   }
 
   public void timeSeries(Value input) {
-    Uri requestUri = this.restApiUri.appendedPath("time_series");
+    Uri requestUri = buildUri("time_series", input);
 
-    for (Item item : input) {
-      if (ignore.contains(item.key().stringValue())) {
-        continue;
-      }
-      requestUri = requestUri.appendedQuery(item.key().stringValue(), item.stringValue());
-    }
-    String nodeUri = input.getSlot("nodeUri").stringValue();
-    String lane = input.getSlot("lane").stringValue();
     try {
-      processRequest(requestUri, nodeUri, lane);
+      processRequest(requestUri, input);
     } catch (Exception e) {
       log.error("Exception while calling api", e);
     }
   }
 
   public void profile(Value input) {
-    Uri requestUri = this.restApiUri.appendedPath("profile");
+    Uri requestUri = buildUri("profile", input);
 
-    for (Item item : input) {
-      if (ignore.contains(item.key().stringValue())) {
-        continue;
-      }
-      requestUri = requestUri.appendedQuery(item.key().stringValue(), item.stringValue());
-    }
-    String nodeUri = input.getSlot("nodeUri").stringValue();
-    String lane = input.getSlot("lane").stringValue();
     try {
-      processRequest(requestUri, nodeUri, lane);
+      processRequest(requestUri, input);
     } catch (Exception e) {
       log.error("Exception while calling api", e);
     }
   }
 
+  Uri buildUri(String path, Value input) {
+    Uri result = this.restApiUri.appendedPath(path);
+
+    for (Item item : input) {
+      if (ignore.contains(item.key().stringValue())) {
+        continue;
+      }
+      result = result.appendedQuery(item.key().stringValue(), item.stringValue());
+    }
+
+    return result;
+  }
+
+  public void eod(Value input) {
+    Uri requestUri = buildUri("eod", input);
+
+    try {
+      processRequest(requestUri, input);
+    } catch (Exception e) {
+      log.error("Exception while calling api", e);
+    }
+
+  }
 }
