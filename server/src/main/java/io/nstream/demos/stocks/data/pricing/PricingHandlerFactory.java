@@ -14,12 +14,6 @@ public class PricingHandlerFactory {
       case "LIMITED_PARTNERSHIP":
         handler = new StockPricingHandler(symbol, warpRef);
         break;
-      case "PHYSICAL_CURRENCY":
-        String[] parts = symbol.split("/");
-        String baseCurrency = parts[0];
-        String quoteCurrency = parts[1];
-        handler = new ForexPricingHandler(baseCurrency, quoteCurrency, warpRef);
-        break;
       default:
         handler = null;
     }

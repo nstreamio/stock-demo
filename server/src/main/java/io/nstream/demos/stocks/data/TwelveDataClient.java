@@ -143,9 +143,6 @@ public class TwelveDataClient extends WebSocketClient {
     log.error("Exception thrown", e);
   }
 
-  public int getAndResetMessagesPerSecond() {
-    return this.messagesPerSecond.getAndSet(0);
-  }
 
   Set<String> ignore = Set.of("nodeUri", "lane");
 
@@ -165,25 +162,8 @@ public class TwelveDataClient extends WebSocketClient {
     this.warpRef.command(nodeUri, lane, value);
   }
 
-  public void timeSeries(Value input) {
-    Uri requestUri = buildUri("time_series", input);
 
-    try {
-      processRequest(requestUri, input);
-    } catch (Exception e) {
-      log.error("Exception while calling api", e);
-    }
-  }
 
-  public void profile(Value input) {
-    Uri requestUri = buildUri("profile", input);
-
-    try {
-      processRequest(requestUri, input);
-    } catch (Exception e) {
-      log.error("Exception while calling api", e);
-    }
-  }
 
   Uri buildUri(String path, Value input) {
     Uri result = this.restApiUri.appendedPath(path);
