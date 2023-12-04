@@ -65,18 +65,6 @@ public class TwelveDataApiAgent extends AbstractAgent {
     this.client.subscribe(symbol);
   }
 
-  @SwimLane("messagesPerSecond")
-  final ValueLane<Integer> messagesPerSecond = this.valueLane();
-
-  TimerRef requestPerSecondTimer = this.setTimer(1000, this::calculateRequestsPerSecond);
-
-  void calculateRequestsPerSecond() {
-    int messages = this.client.getAndResetMessagesPerSecond();
-    this.messagesPerSecond.set(messages);
-    requestPerSecondTimer = this.setTimer(1000, this::calculateRequestsPerSecond);
-  }
-
-
   @SwimLane("connectionOpen")
   final CommandLane<Value> connectionOpen = this.<Value>commandLane()
       .onCommand(input -> {
@@ -100,19 +88,6 @@ public class TwelveDataApiAgent extends AbstractAgent {
         }
       });
 
-  @SwimLane("timeSeries")
-  final CommandLane<Value> timeSeries = this.<Value>commandLane()
-      .onCommand(input -> {
-        this.executor.submit(() -> {
-          this.client.timeSeries(input);
-        });
-      });
-
-  @SwimLane("profile")
-  final CommandLane<Value> profile = this.<Value>commandLane()
-      .onCommand(input -> {
-        this.client.profile(input);
-      });
 
   @SwimLane("eod")
   final CommandLane<Value> eod = this.<Value>commandLane()
@@ -121,6 +96,4 @@ public class TwelveDataApiAgent extends AbstractAgent {
           this.client.eod(input);
         });
       });
-
-
 }
