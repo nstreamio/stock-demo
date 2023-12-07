@@ -43,11 +43,6 @@ export class StockController extends BoardController {
   @ViewRef({
     viewType: PanelView,
     initView(panelView: PanelView) {
-      panelView.set({
-        style: {
-          minWidth: "560px",
-        },
-      });
       panelView.node.classList.add("stock-panel");
       this.owner.tablePanel.insertView(panelView);
     },
@@ -68,9 +63,6 @@ export class StockController extends BoardController {
         unitWidth: 1,
         unitHeight: 1,
         minFrameWidth: 600,
-        style: {
-          minWidth: "560px",
-        },
       });
     },
   })

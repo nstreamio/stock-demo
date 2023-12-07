@@ -191,7 +191,7 @@ export class StockRowController extends RowController {
         // set new timeout to remove "rising" or "falling" from this cell's classList
         this._classRemovalTimers[key] = setTimeout(function () {
           cellView.classList.remove(change);
-        }, 2000);
+        }, 30000);
       }
     });
   }

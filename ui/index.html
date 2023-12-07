@@ -57,9 +57,15 @@
         background-color: #313131 !important;
       }
 
+      .cell {
+        justify-content: center;
+      }
+
       .cell > span {
-        width: 100%;
+        width: min-content;
         text-align: center;
+        position: relative;
+        overflow: visible !important;
       }
 
       .cell:not(.rising), .cell:not(.rising) span, .cell:not(.falling), .cell:not(.falling) span {
@@ -96,8 +102,8 @@
         border-left: 6px solid transparent;
         border-right: 6px solid transparent;
         border-bottom: 8px solid transparent;
-        right: 0px;
-        top: 18px;
+        right: -18px;
+        top: 6px;
       }
       .rising.priceCell span::after,
       .rising.movementCell span::after {
