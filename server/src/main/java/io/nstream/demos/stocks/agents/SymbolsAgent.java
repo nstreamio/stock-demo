@@ -18,7 +18,7 @@ public class SymbolsAgent extends AbstractAgent {
   final CommandLane<Value> add = this.<Value>commandLane().onCommand(input -> {
     log.debug("command = 'add' input: {}", input);
     String symbol = input.stringValue();
-    Uri nodeUri = Uri.empty().path("/", "stocks", symbol);
+    Uri nodeUri = Uri.empty().path("/", "stock", symbol);
     this.stocks.downlink(symbol)
         .nodeUri(nodeUri)
         .laneUri("status")
