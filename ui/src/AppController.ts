@@ -104,8 +104,32 @@ export class AppController extends BoardController {
         },
       });
 
+      const detailsTopRow = detailsContainer.appendChild("div").set({
+        style: {
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "flex-end",
+          width: "100%",
+        },
+      });
+
       // insert NStream title text
-      const title = detailsContainer.appendChild("h1").set({
+      const demoTitle = detailsTopRow.appendChild("h1").set({
+        style: {
+          width: "auto",
+          fontWeight: "400",
+          fontSize: "18px",
+          lineHeight: "24px",
+          color: "#FFFFFF",
+          margin: "0px",
+          boxSizing: "border-box",
+        },
+      });
+      demoTitle.node.innerText = "Stock Demo";
+
+      // insert NStream title text
+      const indexTitle = detailsTopRow.appendChild("h1").set({
         style: {
           width: "auto",
           fontWeight: "600",
@@ -116,7 +140,7 @@ export class AppController extends BoardController {
           boxSizing: "border-box",
         },
       });
-      title.node.innerText = "Stock Demo";
+      indexTitle.node.innerText = "S&P 500";
 
       const detailsBottomRow = detailsContainer.appendChild("div").set({
         style: {
