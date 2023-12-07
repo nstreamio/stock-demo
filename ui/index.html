@@ -71,6 +71,14 @@
         color: var(--electric-teal);
         opacity: 1;
       }
+      
+      .cell.rising.volumeCell, .cell.rising.volumeCell span,
+      .cell.falling.volumeCell, .cell.falling.volumeCell span {
+        transition: color 0ms linear 0ms, opacity 0ms linear 0ms;
+        color: #FFFFFF;
+        opacity: 1;
+        font-weight: 900;
+      }
 
       .cell.falling, .cell.falling span {
         transition: color 0ms linear 0ms, opacity 0ms linear 0ms;
