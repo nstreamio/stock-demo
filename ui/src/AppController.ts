@@ -1,9 +1,9 @@
 import { BoardController } from "@swim/panel";
 import { View, ViewRef } from "@swim/view";
 import { HtmlView } from "@swim/dom";
-import { ControllerRef } from "@swim/controller";
 import { HtmlIconView, VectorIcon } from "@swim/graphics";
-import { StockController } from "./MainController";
+import { StockController } from "./StockController";
+import { RgbColor } from "@swim/style";
 
 export class AppController extends BoardController {
   constructor() {
@@ -27,7 +27,8 @@ export class AppController extends BoardController {
     });
     boardView.node.style.backgroundColor = "#181818";
     this.appBarView.insertView(boardView);
-    this.stockController.attachController();
+    const stockController = new StockController();
+    stockController.sheet.insertView(this.sheet.attachView(), null, null, "stockController");
   }
 
   @ViewRef({
@@ -90,20 +91,18 @@ export class AppController extends BoardController {
       // });
 
       // insert details container
-      const detailsContainer = container
-        .appendChild("div", "app-bar-details-container")
-        .setIntrinsic({
-          style: {
-            height: "100%",
-            display: "flex",
-            flexDirection: "column",
-            flexBasis: "0px",
-            flexGrow: 1,
-            flexShrink: 1,
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-          },
-        });
+      const detailsContainer = container.appendChild("div", "app-bar-details-container").setIntrinsic({
+        style: {
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          flexBasis: "0px",
+          flexGrow: 1,
+          flexShrink: 1,
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+        },
+      });
 
       // insert NStream title text
       const title = detailsContainer.appendChild("h1").set({
@@ -119,8 +118,18 @@ export class AppController extends BoardController {
       });
       title.node.innerText = "Stock Demo";
 
+      const detailsBottomRow = detailsContainer.appendChild("div").set({
+        style: {
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "flex-end",
+          width: "100%",
+        },
+      });
+
       // insert NStream subtitle text
-      const subtitle = detailsContainer.appendChild("p").set({
+      const subtitle = detailsBottomRow.appendChild("p").set({
         style: {
           fontWeight: "400",
           fontSize: "12px",
@@ -135,90 +144,50 @@ export class AppController extends BoardController {
       });
       subtitle.node.innerText = "v1.0.0";
 
-      // const detailsInnerContainer = detailsContainer.appendChild("div").set({
-      //   style: {
-      //     width: "100%",
-      //     display: "flex",
-      //     flexDirection: "row",
-      //     justifyContent: "space-between",
-      //     alignItems: "flex-start",
-      //     boxSizing: "border-box",
-      //   },
-      //   classList: ["details-inner-container"],
-      // });
+      const searchContainer = detailsBottomRow.appendChild("div").set({
+        style: {
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "flex-end",
+          alignItems: "center",
+          width: "auto",
+        },
+      });
 
-      // // const activePlayerCount = detailsInnerContainer.appendChild("p");
-      // this.owner.totalPlayerCount.insertView(detailsInnerContainer);
+      const searchLabel = searchContainer.appendChild("label").set({
+        style: {
+          fontWeight: "400",
+          fontSize: "12px",
+          lineHeight: "17px",
+          color: "#FFFFFF",
+          boxSizing: "border-box",
+          marginRight: "8px",
+        },
+      });
+      searchLabel.node.innerText = "Search";
+      searchLabel.node.setAttribute("for", "search-input");
 
-      // this.owner.totalMatchesCount.insertView(detailsInnerContainer);
+      const searchInput = searchContainer.appendChild("input").set({
+        style: {
+          fontWeight: "400",
+          fontSize: "12px",
+          lineHeight: "17px",
+          color: "#FFFFFF",
+          boxSizing: "border-box",
+          backgroundColor: "transparent",
+          borderRadius: "2px",
+          borderStyle: "solid",
+          borderColor: new RgbColor(255, 255, 255, 0.6),
+          borderWidth: "1px",
+          paddingTop: "0px",
+          paddingRight: "4px",
+          paddingBottom: "0px",
+          paddingLeft: "4px",
+        },
+      });
+      searchInput.node.setAttribute("type", "text");
+      searchInput.node.setAttribute("id", "search-input");
     },
   })
   readonly appBarView!: ViewRef<this, View>;
-
-  // @ViewRef({
-  //   viewType: HtmlView,
-  //   createView(): HtmlView {
-  //     const el = new HtmlView(document.createElement("p")).set({
-  //       style: {
-  //         fontWeight: "400",
-  //         fontSize: "12px",
-  //         lineHeight: "17px",
-  //         color: "#FFFFFF",
-  //         boxSizing: "border-box",
-  //         marginTop: "8px",
-  //         marginRight: "0px",
-  //         marginBottom: "0px",
-  //         marginLeft: "0px",
-  //       },
-  //     });
-  //     el.node.innerText = "total players";
-  //     return el;
-  //   },
-  //   updateNumPlayers(numPlayers: number): void {
-  //     this.attachView().node.innerText = `${numPlayers} total players`;
-  //   },
-  // })
-  // readonly totalPlayerCount!: ViewRef<this, HtmlView> & {
-  //   updateNumPlayers(numPlayers: number): void;
-  // };
-
-  // @ViewRef({
-  //   viewType: HtmlView,
-  //   createView(): HtmlView {
-  //     const el = new HtmlView(document.createElement("p")).set({
-  //       style: {
-  //         fontWeight: "400",
-  //         fontSize: "12px",
-  //         lineHeight: "17px",
-  //         color: "#FFFFFF",
-  //         boxSizing: "border-box",
-  //         marginTop: "8px",
-  //         marginRight: "0px",
-  //         marginBottom: "0px",
-  //         marginLeft: "0px",
-  //       },
-  //     });
-  //     el.node.innerText = "total matches";
-  //     return el;
-  //   },
-  //   updateNumMatches(numMatches: number): void {
-  //     this.attachView().node.innerText = `${numMatches} total matches`;
-  //   },
-  // })
-  // readonly totalMatchesCount!: ViewRef<this, HtmlView> & {
-  //   updateNumMatches(numMatches: number): void;
-  // };
-
-  @ControllerRef({
-    controllerType: StockController,
-    controllerKey: "body",
-    didAttachController(controller: StockController) {
-      controller.sheet.insertView(this.owner.sheet.attachView());
-    },
-  })
-  readonly stockController!: ControllerRef<
-    this,
-    StockController,
-    [StockController]
-  >;
 }

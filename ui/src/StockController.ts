@@ -14,50 +14,10 @@ export class StockController extends BoardController {
 
     const boardView = this.sheet.attachView();
     const panelView = this.panel.insertView(boardView);
-    const tablePanel = this.tablePanel.insertView(panelView);
+    this.tablePanel.insertView(panelView);
 
-    const tableModel = new Model();
-    tableModel.mount();
-    const tableTrait = new TableTrait();
-    tableModel.setTrait("table", tableTrait);
-    tableTrait.header.insertTrait();
-    tableTrait.appendTrait(TextColTrait, "symbol").set({
-      layout: { key: "symbol", grow: 3, textColor: Look.labelColor },
-      label: "Symbol",
-    });
-    tableTrait.appendTrait(TextColTrait, "price").set({
-      layout: { key: "price", grow: 3, textColor: Look.labelColor },
-      label: "Price",
-    });
-    tableTrait.appendTrait(TextColTrait, "volume").set({
-      layout: { key: "volume", grow: 4, textColor: Look.labelColor },
-      label: "Volume",
-    });
-    tableTrait.appendTrait(TextColTrait, "movement").set({
-      layout: { key: "movement", grow: 3, textColor: Look.labelColor },
-      label: "Movement",
-    });
-
-    this.tableController.mount();
-    this.tableController.attachController().tableModel.set(tableModel);
-    this.tableController.attachController().table.insertView(tablePanel);
-    this.tableController.attachController().table.setTrait(tableTrait);
+    this.tableController.attachController();
   }
-
-  @Property({
-    valueType: String,
-    extends: true,
-    didSetValue(newValue, oldValue) {
-      console.log(`didSetValue StockController.searchTerm`);
-      console.log(`newValue: ${newValue}`);
-    },
-    didBindInlet(inlet) {
-      console.log(`didBindInlet StockController.searchTerm`);
-      console.log(`inlet: ${inlet}`);
-      console.log("stockController.searchTerm:", this);
-    },
-  })
-  readonly searchTerm!: Property<this, String>;
 
   @TraitViewRef({
     extends: true,
@@ -119,6 +79,34 @@ export class StockController extends BoardController {
   @ControllerRef({
     controllerType: StockTableController,
     extends: true,
+    initController(controller: StockTableController): void {
+      const tableModel = new Model();
+      tableModel.mount();
+      const tableTrait = new TableTrait();
+      tableModel.setTrait("table", tableTrait);
+      tableTrait.header.insertTrait();
+      tableTrait.appendTrait(TextColTrait, "symbol").set({
+        layout: { key: "symbol", grow: 3, textColor: Look.labelColor },
+        label: "Symbol",
+      });
+      tableTrait.appendTrait(TextColTrait, "price").set({
+        layout: { key: "price", grow: 3, textColor: Look.labelColor },
+        label: "Price",
+      });
+      tableTrait.appendTrait(TextColTrait, "volume").set({
+        layout: { key: "volume", grow: 4, textColor: Look.labelColor },
+        label: "Volume",
+      });
+      tableTrait.appendTrait(TextColTrait, "movement").set({
+        layout: { key: "movement", grow: 3, textColor: Look.labelColor },
+        label: "Movement",
+      });
+
+      controller.mount();
+      controller.tableModel.set(tableModel);
+      controller.table.insertView(this.owner.tablePanel.attachView());
+      controller.table.setTrait(tableTrait);
+    },
   })
   readonly tableController!: ControllerRef<this, StockTableController>;
 }

@@ -1,9 +1,5 @@
 import { ValueDownlink } from "@swim/client";
-import {
-  TraitViewControllerRef,
-  TraitViewControllerSet,
-  TraitViewRef,
-} from "@swim/controller";
+import { TraitViewControllerRef, TraitViewControllerSet, TraitViewRef } from "@swim/controller";
 import {
   HeaderController,
   HeaderTrait,
@@ -16,17 +12,19 @@ import {
   TextCellView,
 } from "@swim/table";
 import { Observes } from "@swim/util";
-import { StockRowController } from "../row/StockRowController";
 import { Record as SwimRecord } from "@swim/structure";
 import { Uri } from "@swim/uri";
 import { Model } from "@swim/model";
 import { Property } from "@swim/component";
+import debounce from "lodash-es/debounce";
+import { StockRowController } from "../row/StockRowController";
 import { StockRowView } from "../row/StockRowView";
 import { StockRowTrait } from "../row/StockRowTrait";
 import { ValueChange, SymbolUpdate } from "../types";
 
 export class StockTableController extends TableController {
   _didSync: boolean = false;
+  _symbolsVisibility: Record<string, boolean> = {};
 
   constructor() {
     super();
@@ -48,6 +46,19 @@ export class StockTableController extends TableController {
     this.symbolsDownlink.setHostUri(host);
     this.symbolsDownlink.setNodeUri(nodeUri);
     this.symbolsDownlink.open();
+
+    const that: StockTableController = this;
+
+    setTimeout(() => {
+      const searchInput = document.getElementById("search-input");
+      searchInput?.addEventListener(
+        "input",
+        debounce(function (e: Event) {
+          const newSearchTerm = (e.target as HTMLInputElement).value.replace(" ", "").toUpperCase();
+          console.log("newSearchTerm:", newSearchTerm);
+        }, 200)
+      );
+    }, 500);
   }
 
   @Property({
