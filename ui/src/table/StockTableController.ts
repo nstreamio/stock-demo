@@ -20,7 +20,7 @@ import debounce from "lodash-es/debounce";
 import { StockRowController } from "../row/StockRowController";
 import { StockRowView } from "../row/StockRowView";
 import { StockRowTrait } from "../row/StockRowTrait";
-import { ValueChange, SymbolUpdate } from "../types";
+import { SymbolUpdate } from "../types";
 
 export class StockTableController extends TableController {
   _didSync: boolean = false;
@@ -118,17 +118,14 @@ export class StockTableController extends TableController {
   @ValueDownlink({
     laneUri: `stocks`,
     consumed: true,
-    didSet(value: SwimRecord): void {
-      const obj = value.toObject() as SymbolUpdate;
+    didSet(newValue: SwimRecord, oldValue: SwimRecord): void {
+      const obj = newValue.toObject() as SymbolUpdate;
       const symbol = obj?.["@update"]?.key ?? "";
 
-      const rowController = this.owner.getChild(symbol, StockRowController);
+      let rowController = this.owner.getChild(symbol, StockRowController);
+      const isNew = !rowController;
 
-      if (rowController) {
-        let change: ValueChange = "none";
-
-        return;
-      } else {
+      if (!rowController) {
         const rowModel = new Model();
         const rowTrait = new StockRowTrait();
         rowModel.setTrait(symbol, rowTrait);
@@ -141,37 +138,41 @@ export class StockTableController extends TableController {
 
         this.owner.tableModel.value.appendChild(rowModel);
 
-        const newStockRowController = Object.values(this.owner.rows.controllers).find(
-          (c) => c?.key === symbol
-        ) as StockRowController | undefined;
+        rowController =
+          Object.values(this.owner.rows.controllers).find((c) => c?.key === symbol) ??
+          (null as StockRowController | null);
 
-        if (newStockRowController) {
-          newStockRowController.symbolCell.setTrait(symbolCell);
-          newStockRowController.priceCell.setTrait(priceCell);
-          newStockRowController.volumeCell.setTrait(volumeCell);
-          newStockRowController.movementCell.setTrait(movementCell);
+        if (rowController) {
+          rowController.symbolCell.setTrait(symbolCell);
+          rowController.priceCell.setTrait(priceCell);
+          rowController.volumeCell.setTrait(volumeCell);
+          rowController.movementCell.setTrait(movementCell);
 
           ["symbol", "price", "volume", "movement"].forEach(function (key) {
-            const view = Object.values(
-              newStockRowController.row.attachView().leaf.attachView().cells.views
+            // get this row's TextCellView for each column
+            const cellView = Object.values(
+              rowController!.row.attachView().leaf.attachView().cells.views
             ).find((v) => v?.key === key) as TextCellView | undefined;
-            if (view) {
+
+            if (cellView) {
               (
-                newStockRowController[`${key}Cell` as "priceCell"] as TraitViewRef<
+                rowController![`${key}Cell` as "priceCell"] as TraitViewRef<
                   StockRowController,
                   TextCellTrait,
                   TextCellView
                 >
-              ).setView(view, null, key);
+              ).setView(cellView, null, key);
             }
             if (key === "symbol") {
-              newStockRowController.symbolCell.attachView().set({
+              rowController!.symbolCell.attachView().set({
                 content: symbol,
               });
             }
           });
         }
       }
+
+      rowController?.updateRow(newValue, oldValue, isNew);
     },
   })
   readonly symbolsDownlink!: ValueDownlink<this>;
