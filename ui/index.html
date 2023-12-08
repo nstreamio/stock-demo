@@ -30,6 +30,11 @@
         padding: 0px;
       }
 
+      input:focus-visible {
+        outline: none;
+        outline-offset: unset;
+      }
+
       .header {
         font-size: 12px;
         position: sticky !important;
@@ -52,9 +57,15 @@
         background-color: #313131 !important;
       }
 
+      .cell {
+        justify-content: center;
+      }
+
       .cell > span {
-        width: 100%;
+        width: min-content;
         text-align: center;
+        position: relative;
+        overflow: visible !important;
       }
 
       .cell:not(.rising), .cell:not(.rising) span, .cell:not(.falling), .cell:not(.falling) span {
@@ -65,6 +76,14 @@
         transition: color 0ms linear 0ms, opacity 0ms linear 0ms;
         color: var(--electric-teal);
         opacity: 1;
+      }
+      
+      .cell.rising.volumeCell, .cell.rising.volumeCell span,
+      .cell.falling.volumeCell, .cell.falling.volumeCell span {
+        transition: color 0ms linear 0ms, opacity 0ms linear 0ms;
+        color: #FFFFFF;
+        opacity: 1;
+        font-weight: 900;
       }
 
       .cell.falling, .cell.falling span {
@@ -83,8 +102,8 @@
         border-left: 6px solid transparent;
         border-right: 6px solid transparent;
         border-bottom: 8px solid transparent;
-        right: 0px;
-        top: 18px;
+        right: -18px;
+        top: 6px;
       }
       .rising.priceCell span::after,
       .rising.movementCell span::after {

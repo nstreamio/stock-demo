@@ -13,6 +13,6 @@
 // limitations under the License.
 
 export * from "./AppController";
-export * from "./MainController";
+export * from "./StockController";
 export * from "./table";
 export * from "./row";
