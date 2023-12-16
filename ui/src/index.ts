@@ -14,5 +14,5 @@
 
 export * from "./AppController";
 export * from "./StockController";
-export * from "./table";
-export * from "./row";
+export * from "./StockTableController";
+export * from "./StockRowController";

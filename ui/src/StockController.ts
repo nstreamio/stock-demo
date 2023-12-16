@@ -5,8 +5,7 @@ import { ViewRef } from "@swim/view";
 import { PanelView } from "@swim/panel";
 import { TableTrait, TextColTrait } from "@swim/ux";
 import { Look } from "@swim/theme";
-import { StockTableController } from "./table/StockTableController";
-import { Property } from "@swim/component";
+import { StockTableController } from "./StockTableController";
 
 export class StockController extends BoardController {
   constructor() {

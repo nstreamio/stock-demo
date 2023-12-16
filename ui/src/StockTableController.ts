@@ -5,6 +5,8 @@ import {
   HeaderTrait,
   HeaderView,
   RowController,
+  RowTrait,
+  RowView,
   TableController,
   TableTrait,
   TableView,
@@ -16,11 +18,8 @@ import { Record as SwimRecord } from "@swim/structure";
 import { Uri } from "@swim/uri";
 import { Model } from "@swim/model";
 import { Property } from "@swim/component";
-import debounce from "lodash-es/debounce";
-import { StockRowController } from "../row/StockRowController";
-import { StockRowView } from "../row/StockRowView";
-import { StockRowTrait } from "../row/StockRowTrait";
-import { SymbolUpdate } from "../types";
+import { StockRowController } from "./StockRowController";
+import { SymbolUpdate } from "./types";
 
 export class StockTableController extends TableController {
   _didSync: boolean = false;
@@ -46,19 +45,6 @@ export class StockTableController extends TableController {
     this.symbolsDownlink.setHostUri(host);
     this.symbolsDownlink.setNodeUri(nodeUri);
     this.symbolsDownlink.open();
-
-    const that: StockTableController = this;
-
-    setTimeout(() => {
-      const searchInput = document.getElementById("search-input");
-      searchInput?.addEventListener(
-        "input",
-        debounce(function (e: Event) {
-          const newSearchTerm = (e.target as HTMLInputElement).value.replace(" ", "").toUpperCase();
-          console.log("newSearchTerm:", newSearchTerm);
-        }, 200)
-      );
-    }, 500);
   }
 
   @Property({
@@ -84,16 +70,8 @@ export class StockTableController extends TableController {
 
   @TraitViewControllerSet({
     extends: true,
-    controllerDidEnterLeafView(leafView, rowController) {
-      leafView.hover.focus(false);
-    },
-    controllerDidLeaveLeafView(leafView, rowController) {
-      leafView.hover.unfocus(false);
-    },
-    controllerDidPressLeafView(input, event, leafView, rowController) {
-      leafView.highlight.toggle();
-    },
     attachCellView(cellView, cellController, rowController) {
+      console.log("cellView:", cellView);
       super.attachCellView(cellView, cellController, rowController);
       if (cellView.key === "a") {
         cellView.style.color.set("#989898");
@@ -111,13 +89,12 @@ export class StockTableController extends TableController {
       return super.createController(trait);
     },
   })
-  override readonly rows!: TraitViewControllerSet<this, StockRowTrait, StockRowView, StockRowController> &
+  override readonly rows!: TraitViewControllerSet<this, RowTrait, RowView, StockRowController> &
     Observes<RowController> &
     TableController["rows"];
 
   @ValueDownlink({
     laneUri: `stocks`,
-    consumed: true,
     didSet(newValue: SwimRecord, oldValue: SwimRecord): void {
       const obj = newValue.toObject() as SymbolUpdate;
       const symbol = obj?.["@update"]?.key ?? "";
@@ -127,7 +104,7 @@ export class StockTableController extends TableController {
 
       if (!rowController) {
         const rowModel = new Model();
-        const rowTrait = new StockRowTrait();
+        const rowTrait = new RowTrait();
         rowModel.setTrait(symbol, rowTrait);
 
         // Create cells in trait before appending to model to display being set to 'none'
@@ -162,11 +139,28 @@ export class StockTableController extends TableController {
                   TextCellView
                 >
               ).setView(cellView, null, key);
-            }
-            if (key === "symbol") {
-              rowController!.symbolCell.attachView().set({
-                content: symbol,
-              });
+
+              // apply a css class and some basic styling to each cell
+              if (key === "symbol") {
+                rowController!.symbolCell.attachView().set({
+                  content: symbol,
+                  style: {
+                    fontSize: "16px",
+                    fontWeight: "900",
+                    color: "#FBFBFB",
+                    opacity: 0.9,
+                  },
+                });
+              } else {
+                cellView.set({
+                  classList: [`${key}Cell`],
+                  style: {
+                    fontSize: "14px",
+                    color: "#FBFBFB",
+                    opacity: 0.8,
+                  },
+                });
+              }
             }
           });
         }
