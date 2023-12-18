@@ -2,7 +2,7 @@ import { BoardController } from "@swim/panel";
 import { View, ViewRef } from "@swim/view";
 import { HtmlView } from "@swim/dom";
 import { HtmlIconView, VectorIcon } from "@swim/graphics";
-import { StockController } from "./StockController";
+import { StockController } from "./stock/StockController";
 import { RgbColor } from "@swim/style";
 
 export class AppController extends BoardController {

@@ -19,7 +19,7 @@ import { Uri } from "@swim/uri";
 import { Model } from "@swim/model";
 import { Property } from "@swim/component";
 import { StockRowController } from "./StockRowController";
-import { SymbolUpdate } from "./types";
+import { SymbolUpdate } from "../types";
 
 export class StockTableController extends TableController {
   _didSync: boolean = false;

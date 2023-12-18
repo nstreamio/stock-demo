@@ -3,7 +3,7 @@ import { TraitRef } from "@swim/model";
 import { LeafTrait, LeafView, RowController, RowTrait, TextCellTrait, TextCellView } from "@swim/table";
 import { Record as SwimRecord } from "@swim/structure";
 import { Observes } from "@swim/util";
-import { ValueChange } from "./types";
+import { ValueChange } from "../types";
 
 export class StockRowController extends RowController {
   private _classRemovalTimers: {
