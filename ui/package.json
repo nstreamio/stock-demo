@@ -15,7 +15,6 @@
     "@rollup/plugin-terser": "0.4",
     "@types/eslint": "8",
     "@types/node": "20",
-    "@types/lodash-es": "4.17.12",
     "@typescript-eslint/eslint-plugin": "5",
     "@typescript-eslint/parser": "5",
     "eslint": "8",
@@ -66,8 +65,7 @@
     "@swim/view": "4.0.0-dev.20230923",
     "@swim/vis": "4.0.0-dev.20230923",
     "@swim/warp": "4.0.0-dev.20230923",
-    "@swim/window": "4.0.0-dev.20230923",
-    "lodash-es": "4.17.21"
+    "@swim/window": "4.0.0-dev.20230923"
   },
   "scripts": {
     "mkdir-ui": "mkdir -p ./dist/lib && mkdir -p ./dist/assets && mkdir -p ./build/javascript",
@@ -78,7 +76,7 @@
     "copy-ux": "cp node_modules/@swim/ux/dist/umd/*.min.js* ./dist/lib",
     "copy-vis": "cp node_modules/@swim/vis/dist/umd/*.min.js* ./dist/lib",
     "copy-libs": "npm run copy-core && npm run copy-host && npm run copy-ui && npm run copy-ux && npm run copy-vis",
-    "copy-app": "cp ./*.html ./dist && cp -rf ./assets/* ./dist/assets && cp -rf ./build/javascript/* ./dist/lib ",
+    "copy-app": "cp ./*.html ./dist && cp -rf ./assets/* ./dist/assets && cp -rf ./build/javascript/* ./dist/lib && cp ./src/index.css ./dist/index.css",
     "bundle": "rollup -c && npm run copy-app",
     "build": "npm run compile && npm run bundle",
     "postinstall": "npm run mkdir-ui && npm run copy-libs"

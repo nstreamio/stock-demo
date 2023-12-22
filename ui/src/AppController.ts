@@ -2,8 +2,7 @@ import { BoardController } from "@swim/panel";
 import { View, ViewRef } from "@swim/view";
 import { HtmlView } from "@swim/dom";
 import { HtmlIconView, VectorIcon } from "@swim/graphics";
-import { StockController } from "./StockController";
-import { RgbColor } from "@swim/style";
+import { StockController } from "./stock/StockController";
 
 export class AppController extends BoardController {
   constructor() {
@@ -77,18 +76,6 @@ export class AppController extends BoardController {
         },
         classList: ["n-stream-icon"],
       });
-
-      // // insert Swim logo
-      // const imgEl = document.createElement("img");
-      // imgEl.src = "./assets/swim-logo.png";
-      // container.insertChild(new HtmlView(imgEl), null, "swimLogo").set({
-      //   style: {
-      //     width: "48px",
-      //     height: "48px",
-      //     marginRight: "16px",
-      //   },
-      //   classList: ["swim-logo"],
-      // });
 
       // insert details container
       const detailsContainer = container.appendChild("div", "app-bar-details-container").setIntrinsic({
@@ -167,50 +154,6 @@ export class AppController extends BoardController {
         },
       });
       subtitle.node.innerText = "v1.0.0";
-
-      const searchContainer = detailsBottomRow.appendChild("div").set({
-        style: {
-          display: "flex",
-          flexDirection: "row",
-          justifyContent: "flex-end",
-          alignItems: "center",
-          width: "auto",
-        },
-      });
-
-      const searchLabel = searchContainer.appendChild("label").set({
-        style: {
-          fontWeight: "400",
-          fontSize: "12px",
-          lineHeight: "17px",
-          color: "#FFFFFF",
-          boxSizing: "border-box",
-          marginRight: "8px",
-        },
-      });
-      searchLabel.node.innerText = "Search";
-      searchLabel.node.setAttribute("for", "search-input");
-
-      const searchInput = searchContainer.appendChild("input").set({
-        style: {
-          fontWeight: "400",
-          fontSize: "12px",
-          lineHeight: "17px",
-          color: "#FFFFFF",
-          boxSizing: "border-box",
-          backgroundColor: "transparent",
-          borderRadius: "2px",
-          borderStyle: "solid",
-          borderColor: new RgbColor(255, 255, 255, 0.6),
-          borderWidth: "1px",
-          paddingTop: "0px",
-          paddingRight: "4px",
-          paddingBottom: "0px",
-          paddingLeft: "4px",
-        },
-      });
-      searchInput.node.setAttribute("type", "text");
-      searchInput.node.setAttribute("id", "search-input");
     },
   })
   readonly appBarView!: ViewRef<this, View>;

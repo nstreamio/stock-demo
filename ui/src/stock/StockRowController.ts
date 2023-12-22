@@ -1,14 +1,6 @@
 import { TraitViewRef } from "@swim/controller";
 import { TraitRef } from "@swim/model";
-import {
-  LeafTrait,
-  LeafView,
-  RowController,
-  RowTrait,
-  RowView,
-  TextCellTrait,
-  TextCellView,
-} from "@swim/table";
+import { LeafTrait, LeafView, RowController, RowTrait, TextCellTrait, TextCellView } from "@swim/table";
 import { Record as SwimRecord } from "@swim/structure";
 import { Observes } from "@swim/util";
 import { ValueChange } from "../types";
@@ -31,20 +23,6 @@ export class StockRowController extends RowController {
   }
 
   @TraitViewRef({
-    viewType: RowView,
-    extends: true,
-    initView(rowView: RowView): void {
-      super.initView(rowView);
-      rowView.set({
-        style: {
-          height: "44px",
-        },
-      });
-    },
-  })
-  override readonly row!: TraitViewRef<this, RowTrait, RowView>;
-
-  @TraitViewRef({
     viewType: LeafView,
     extends: true,
     initView(leafView: LeafView): void {
@@ -54,14 +32,6 @@ export class StockRowController extends RowController {
           height: "44px",
         },
       });
-    },
-    viewDidPress(): void {
-      // disable default press action
-      return;
-    },
-    viewDidLongPress(): void {
-      // disable default long press action
-      return;
     },
   })
   override readonly leaf!: TraitViewRef<this, LeafTrait, LeafView> & Observes<LeafTrait> & Observes<LeafView>;
@@ -75,73 +45,24 @@ export class StockRowController extends RowController {
   @TraitViewRef({
     traitType: TextCellTrait,
     viewType: TextCellView,
-    initView(view): void {
-      super.initView(view);
-      view.set({
-        classList: ["symbolCell"],
-        style: {
-          fontSize: "16px",
-          fontWeight: "900",
-          color: "#FBFBFB",
-          opacity: 0.9,
-        },
-      });
-    },
-    extends: true,
   })
   readonly symbolCell!: TraitViewRef<this, TextCellTrait, TextCellView>;
 
   @TraitViewRef({
     traitType: TextCellTrait,
     viewType: TextCellView,
-    initView(view): void {
-      super.initView(view);
-      view.set({
-        classList: ["priceCell"],
-        style: {
-          fontSize: "14px",
-          color: "#FBFBFB",
-          opacity: 0.8,
-        },
-      });
-    },
-    extends: true,
   })
   readonly priceCell!: TraitViewRef<this, TextCellTrait, TextCellView>;
 
   @TraitViewRef({
     traitType: TextCellTrait,
     viewType: TextCellView,
-    initView(view): void {
-      super.initView(view);
-      view.set({
-        classList: ["volumeCell"],
-        style: {
-          fontSize: "14px",
-          color: "#FBFBFB",
-          opacity: 0.8,
-        },
-      });
-    },
-    extends: true,
   })
   readonly volumeCell!: TraitViewRef<this, TextCellTrait, TextCellView>;
 
   @TraitViewRef({
     traitType: TextCellTrait,
     viewType: TextCellView,
-    initView(view): void {
-      super.initView(view);
-      view.set({
-        classList: ["movementCell"],
-        style: {
-          fontSize: "14px",
-          color: "#FBFBFB",
-          opacity: 0.8,
-        },
-      });
-    },
-    extends: true,
   })
   readonly movementCell!: TraitViewRef<this, TextCellTrait, TextCellView>;
 
@@ -154,7 +75,6 @@ export class StockRowController extends RowController {
 
       const newValue = newRecord.get(key).stringValue("");
       const oldValue = oldRecord.get(key).stringValue();
-      console.log("oldValue:", oldValue);
 
       let content: string = "";
       // apply appropriate text content formatting
@@ -191,7 +111,7 @@ export class StockRowController extends RowController {
         // set new timeout to remove "rising" or "falling" from this cell's classList
         this._classRemovalTimers[key] = setTimeout(function () {
           cellView.classList.remove(change);
-        }, 30000);
+        }, 2000);
       }
     });
   }
