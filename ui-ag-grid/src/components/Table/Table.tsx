@@ -14,9 +14,6 @@ const getRowStyle: GridOptions<Stock>["getRowStyle"] = (params) => {
   if (params?.data?.state != null) {
     styles.color = params.data.state === "falling" ? "var(--red-alert)" : "var(--green-alert)";
   }
-  if (params?.data?.key === "AAPL") {
-    console.log("styles:", styles);
-  }
   return styles;
 };
 
