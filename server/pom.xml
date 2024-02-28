@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0">
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.nstream.demos</groupId>
-    <artifactId>stocks</artifactId>
+    <artifactId>stocks-live</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
@@ -78,7 +78,7 @@
                         <image>eclipse-temurin:17.0.8.1_1-jre</image>
                     </from>
                     <to>
-                        <image>nstream/demo-${artifactId}:${version}</image>
+                        <image>nstream/demo-${project.artifactId}:${project.version}</image>
                         <auth>
                             <username>${env.REGISTRY_USERNAME}</username>
                             <password>${env.REGISTRY_PASSWORD}</password>

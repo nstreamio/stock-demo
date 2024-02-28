@@ -1,3 +1,3 @@
 library('jenkins-pipeline')
 
-demoServerUiPipeline("stocks", "maven")
+demoServerUiPipeline("stocks-live", "maven")
