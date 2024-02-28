@@ -1,6 +1,6 @@
 # Stocks Demo UI, NStream UI Version
 
-This UI displays a real-time table of the current price and daily movement of all stocks in the S&P 500. A single downlink is opened to the `symbols` lane of the `TwelveDataApiAgent` hosted at the application run from this project's `/server` directory. This downlink syncs with the lane's state containing pricing for all 500 stock symbols and then receives follow-on price updates until the downlink is closed. With each update received, local state and UI table content is updated.
+This UI displays a real-time table of the current price and daily movement of all stocks in the S&P 500. A single downlink is opened to the `stocks` lane of the `SymbolsAgent` hosted at the application run from this project's `/server` directory. This downlink syncs with the lane's state containing pricing for all 500 stock symbols and then receives follow-on price updates until the downlink is closed. With each update received, local state and UI table content is updated.
 
 This directory contains an alternative UI which was built with NStream's UI framework. With the exception of search, it is functionally the same as the UI contained in the `/ui` directory. The source of the financial streaming data is [TwelveData](https://twelvedata.com/).
 
