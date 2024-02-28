@@ -1,6 +1,6 @@
 import { FC, FormEvent, FormEventHandler } from "react";
 import { AppHeaderProps } from "./AppHeader.types";
-import swimLogo from "../../assets/swim-logo.png";
+import nStreamLogo from "../../assets/nstream-logo.svg";
 
 export const AppHeader: FC<AppHeaderProps> = (props) => {
   const { search, setSearch } = props;
@@ -11,7 +11,7 @@ export const AppHeader: FC<AppHeaderProps> = (props) => {
 
   return (
     <nav className="w-full h-auto flex flex-row grow-0 shrink-0 p-4">
-      <img className="mr-4 w-12 h-12" src={swimLogo} alt="Swim logo" />
+      <img className="mr-4 w-12 h-12" src={nStreamLogo} alt="Swim logo" />
       <div className="h-full flex flex-col grow shrink justify-between items-start">
         <h1 className="text-xl font-semibold">Stock Demo</h1>
         <h2 className="text-xs">v1.0.0</h2>

@@ -1,0 +1,11 @@
+.DS_Store
+.idea
+.gradle
+.sass-cache
+.vscode
+dist
+doc
+lib
+build
+node_modules
+package-lock.json
