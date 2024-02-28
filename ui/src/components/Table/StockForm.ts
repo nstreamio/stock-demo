@@ -17,14 +17,13 @@ export class StockForm extends Form<Stock | undefined> {
       item.get("volume").isDefined() &&
       item.get("movement").isDefined()
     ) {
-      const object = {
+      return {
         price: item.get("price").numberValue(0),
         volume: item.get("volume").numberValue(0),
         movement: item.get("movement").numberValue(0),
         timestamp: item.get("timestamp").numberValue(0),
         state: null,
       };
-      return object;
     }
 
     return undefined;
