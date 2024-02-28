@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Stock Demo</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="icon" href="assets/favicon.ico" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link href="./index.css" type="text/css" rel="stylesheet">
+</head>
+<body swim-theme style="display: flex;">
+<script src="./lib/swim-core.min.js"></script>
+<script src="./lib/swim-host.min.js"></script>
+<script src="./lib/swim-ui.min.js"></script>
+<script src="./lib/swim-ux.min.js"></script>
+<script src="./lib/swim-vis.min.js"></script>
+<script src="./lib/stock-demo.min.js"></script>
+<script>
+
+if (navigator.standalone) {
+  document.documentElement.style.width = "100vw";
+  document.documentElement.style.height = "100vh";
+} else {
+  document.documentElement.style.width = "100%";
+  document.documentElement.style.height = "100%";
+}
+document.body.style.position = "fixed";
+document.body.style.margin = "0";
+document.body.style.overflow = "hidden";
+document.body.style.backgroundColor = "#212121";
+if (navigator.standalone) {
+  document.body.style.width = "100vw";
+  document.body.style.height = "100vh";
+} else {
+  document.body.style.width = "100%";
+  document.body.style.height = "100%";
+}
+
+// create htmlView from document.body
+const bodyView = swim.HtmlView.fromNode(document.body).set({
+  style: {
+    boxSizing: 'border-box',
+    margin: '0',
+  },
+});
+
+// create base controller (AppController ? )
+const appController = new swim["stock-demo"].AppController();
+
+// call insertView on base controller, passing the htmlView as the parent
+appController.sheet.insertView(bodyView);
+    </script>
+</body>
+</html>

@@ -1,9 +1,9 @@
 import { ValueFormatterFunc } from "ag-grid-community";
-import { Stock } from "../../components/Table";
+import { Cusip } from "../../components/Table";
 
 const DATA_PLACHOLDER = "--";
 
-export const numValueFormatter: ValueFormatterFunc<Stock, number | undefined> = (param) =>
+export const numValueFormatter: ValueFormatterFunc<Cusip, number | undefined> = (param) =>
   param.value ? formatNum(param.value) : DATA_PLACHOLDER;
 
 function formatNum(num: number): string {
