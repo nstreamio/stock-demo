@@ -4,7 +4,7 @@ export interface TableProps {
 
 export type PriceChangeState = "falling" | "rising" | null | undefined;
 
-export type Cusip = {
+export type Stock = {
   price: number;
   volume?: number;
   movement?: number;
@@ -13,10 +13,10 @@ export type Cusip = {
 };
 
 // for use determining correct row style to apply
-export type CusipMeta = {
+export type StockMeta = {
   timer: NodeJS.Timeout | null;
   prevDisplayedPrice?: number;
   priceLastUpdated?: number;
 }
 
-export type CusipRow = Cusip & { key: string };
+export type StockRow = Stock & { key: string };
