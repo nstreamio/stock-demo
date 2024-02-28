@@ -78,7 +78,7 @@
                         <image>eclipse-temurin:17.0.8.1_1-jre</image>
                     </from>
                     <to>
-                        <image>nstream/demo-${artifactId}:${version}</image>
+                        <image>nstream/demo-${project.artifactId}:${project.version}</image>
                         <auth>
                             <username>${env.REGISTRY_USERNAME}</username>
                             <password>${env.REGISTRY_PASSWORD}</password>
