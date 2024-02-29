@@ -1,16 +1,36 @@
-import { FC, useCallback, useEffect, useRef, useState } from "react";
-import { WarpClient } from "@swim/client";
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Form } from "@swim/structure";
 import { AgGridReact } from "ag-grid-react";
 import { CellStyle, ColDef, GridOptions, RowStyle } from "ag-grid-community";
+import { throttle } from "lodash-es";
 import { TableProps, Stock, StockRow, PriceChangeState, StockMeta } from "./Table.types";
 import { numValueFormatter } from "../../lib/helpers/numFormatting";
 import { StockForm } from "./StockForm";
 import "ag-grid-community/styles/ag-grid.css";
+import { useMapDownlink } from "../../lib/hooks/useMapDownlink";
 
 const NEW_STOCK_METADATA: StockMeta = { timer: null, priceLastUpdated: 0, prevDisplayedPrice: 0 };
 const UPDATED_ROW_STYLE_DURATION_MS = 2000;
 const MAX_UI_REFRESH_INTERVAL_MS = 16; // ~60/sec
+const hostUri: string = (() => {
+  const urlParams = new URLSearchParams(window.location.search);
+  let uri = urlParams.get("host");
+
+  if (!uri) {
+    const protocol = window.location.protocol.startsWith("https") ? "warps:" : "warp:";
+    let hostFragment = window.location.host;
+
+    /* If the UI is being served from localhost and no host is explicitly provided,
+       then fall back to the default Swim server port, localhost:9001 */
+    if (hostFragment.startsWith("localhost:") || hostFragment.startsWith("127.0.0.1:")) {
+      hostFragment = "localhost:9001";
+    }
+
+    uri = `${protocol}//${hostFragment}`;
+  }
+
+  return uri
+})();
 
 const getRowStyle: GridOptions<StockRow>["getRowStyle"] = (params) => {
   const styles: RowStyle = {
@@ -47,10 +67,22 @@ export const Table: FC<TableProps> = (props) => {
   // Stock metadata to help with styling; updates to this value do not trigger rerenders
   const stocksMetaRef = useRef<Record<string, StockMeta>>({});
 
-  // Flag representing whether stocksRef contains more up-to-date data than what is being displayed in the UI
-  const needsRerenderRef = useRef<boolean>(false);
   const lastRowDataUpdatedAt = useRef<number>(0);
-  const setRowDataIntervalRef = useRef<NodeJS.Timeout | null>(null); // used for cleanup
+
+  const updateRowData: () => void = useMemo(
+    () => (
+      throttle(
+        // fire at most every MAX_UI_REFRESH_INTERVAL_MS, including both the leading and trailing invocation
+        () => {
+          lastRowDataUpdatedAt.current = Date.now();
+          setRowData(Object.values(stocksRef.current));
+        },
+        MAX_UI_REFRESH_INTERVAL_MS,
+        { leading: true, trailing: true }
+      ) as () => void
+    ),
+    []
+  );
 
   // callback which handles individual Stock updates
   const didUpdate: (key: string, newStock: Stock | undefined, oldStock: Stock | undefined) => void = useCallback(
@@ -92,6 +124,8 @@ export const Table: FC<TableProps> = (props) => {
             state: null,
           }
           stocksMetaRef.current[key].timer = null;
+
+          updateRowData();
         };
 
         // clear row styles after a delay; set newStock metadata
@@ -107,10 +141,10 @@ export const Table: FC<TableProps> = (props) => {
         key,
         state,
       };
-      // alert component that new newStock data has been received
-      needsRerenderRef.current = true;
+
+      updateRowData();
     },
-    []
+    [updateRowData]
   );
 
   // callback which handles individual Stock updates
@@ -124,66 +158,30 @@ export const Table: FC<TableProps> = (props) => {
       // Delete key for this stock key in stocksRef and stocksMetaRef. This will not trigger a rerender.
       delete stocksMetaRef.current[key];
       delete stocksRef.current[key];
-      // alert component that a stock record has been removed and a rerender is needed
-      needsRerenderRef.current = true;
+
+      updateRowData();
     },
-    []
+    [updateRowData]
   );
 
-  // Periodically update rowData with the more up-to-date data in stocksRef. Will trigger a rerender.
-  useEffect(() => {
-    setRowDataIntervalRef.current = setInterval(() => {
-      if (needsRerenderRef.current && stocksRef.current) {
-        needsRerenderRef.current = false;
-        lastRowDataUpdatedAt.current = Date.now();
-        setRowData(Object.values(stocksRef.current));
-      }
-    }, MAX_UI_REFRESH_INTERVAL_MS);
-
-    return (() => {
-      // cleanup
-      if (setRowDataIntervalRef.current) {
-        clearInterval(setRowDataIntervalRef.current);
-      }
-    })
-  }, []);
+  // open downlink on component mount
+  const downlink = useMapDownlink<string, Stock | undefined>({
+    hostUri,
+    nodeUri: "/symbols",
+    laneUri: "stocks",
+    keyForm: Form.forString(),
+    valueForm: new StockForm(), // coerces content of WARP message to strongly-typed JS object
+    didUpdate,
+    didRemove,
+  });
 
   useEffect(() => {
-    const client = new WarpClient();
-
-    const urlParams = new URLSearchParams(window.location.search);
-    let hostUri = urlParams.get("host");
-
-    if (!hostUri) {
-      const protocol = window.location.protocol.startsWith("https") ? "warps:" : "warp:";
-      let hostFragment = window.location.host;
-
-      /* If the UI is being served from localhost and no host is explicitly provided,
-         then fall back to the default Swim server port, localhost:9001 */
-      if (hostFragment.startsWith("localhost:") || hostFragment.startsWith("127.0.0.1:")) {
-        hostFragment = "localhost:9001";
-      }
-
-      hostUri = `${protocol}//${hostFragment}`;
-    }
-
-    const downlink = client.downlinkMap<string, Stock | undefined>({
-      hostUri,
-      nodeUri: "/symbols",
-      laneUri: "stocks",
-      keyForm: Form.forString(),
-      valueForm: new StockForm(), // coerces content of WARP message to strongly-typed JS object
-      didUpdate,
-      didRemove
-    })
-    .open();
+    downlink.open();
 
     return () => {
-      if (downlink) {
-        downlink.close();
-      }
+      downlink?.close();
     };
-  }, [didUpdate, didRemove]);
+  }, [downlink]);
 
   return (
     <div className="h-full px-4 lg:px-8 justify-center">
