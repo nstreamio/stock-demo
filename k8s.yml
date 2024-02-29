@@ -8,12 +8,12 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      demo: stocks
+      demo: stocks-live
   serviceName: demo
   template:
     metadata:
       labels:
-        demo: stocks
+        demo: stocks-live
     spec:
       containers:
         - image: DOCKER_IMAGE
