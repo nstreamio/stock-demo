@@ -1,7 +1,7 @@
 # Nstream Stock Demo
 
 A tutorial application for teaching core Swim concepts.  See a hosted version
-of this app running at [https://stocks.nstream-demo.io](https://stocks.nstream-demo.io/).
+of this app running at [https://stocks-live.nstream-demo.io](https://stocks-live.nstream-demo.io/).
 
 # Introduction 
 
@@ -53,8 +53,8 @@ The [swim-cli](https://www.swimos.org/backend/cli/) is the simplest way to fetch
 ### Application APIs
 **Note:**
 * Below **swim-cli** commands for introspection are for streaming locally running application.
-* There is a hosted version of this application running here: https://stocks.nstream-demo.io/
-* To stream APIs for the hosted version, replace `warp://localhost:9001` in below commands with `warps://stocks.nstream-demo.io`
+* There is a hosted version of this application running here: https://stocks-live.nstream-demo.io/
+* To stream APIs for the hosted version, replace `warp://localhost:9001` in below commands with `warps://stocks-live.nstream-demo.io`
 
 (Below, Stock ticker symbol "AAPL" is used as an example)
 
