@@ -31,7 +31,7 @@ public class TwelveDataApiAgent extends AbstractAgent {
     log.trace("willStart() - ");
     String token = System.getenv("TOKEN");
 
-    this.executor = Executors.newFixedThreadPool(4);
+    this.executor = Executors.newFixedThreadPool(8);
 
     if (null == token) {
       throw new IllegalStateException("Environment Variable TOKEN must be configured.");
