@@ -3,6 +3,7 @@ package io.nstream.demos.stocks.data;
 import io.nstream.demos.stocks.data.pricing.AbstractPricingHandler;
 import io.nstream.demos.stocks.data.pricing.PricingHandlerFactory;
 import org.java_websocket.client.WebSocketClient;
+import org.java_websocket.enums.ReadyState;
 import org.java_websocket.handshake.ServerHandshake;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +37,7 @@ public class TwelveDataClient extends WebSocketClient {
   private final HttpClient httpClient;
 
   private final ScheduledExecutorService executorService;
+
   public TwelveDataClient(WarpRef warpRef, Uri nodeUri, String token) {
     super(URI.create(String.format("wss://ws.twelvedata.com/v1/quotes/price?apikey=%s", token)));
     this.warpRef = warpRef;
@@ -48,11 +50,18 @@ public class TwelveDataClient extends WebSocketClient {
   }
 
   void sendKeepAlive() {
-    log.trace("sendKeepAlive() - sending heartbeat.");
-    sendValue(
-        Record.of()
-            .slot("action", "heartbeat")
-    );
+    ReadyState readyState = this.getReadyState();
+
+    if(readyState == ReadyState.OPEN) {
+      log.trace("sendKeepAlive() - sending heartbeat.");
+      sendValue(
+          Record.of()
+              .slot("action", "heartbeat")
+      );
+    } else if(readyState == ReadyState.CLOSED) {
+      log.warn("sendKeepAlive() - readyState = {}. Calling connect().", readyState);
+      this.connect();
+    }
   }
 
   @Override
