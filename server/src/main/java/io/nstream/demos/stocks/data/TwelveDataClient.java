@@ -48,6 +48,7 @@ public class TwelveDataClient extends WebSocketClient {
   }
 
   void sendKeepAlive() {
+    log.trace("sendKeepAlive() - sending heartbeat.");
     sendValue(
         Record.of()
             .slot("action", "heartbeat")
@@ -56,6 +57,7 @@ public class TwelveDataClient extends WebSocketClient {
 
   @Override
   public void onOpen(ServerHandshake serverHandshake) {
+    log.info("onOpen() - status = {}", serverHandshake.getHttpStatus());
     this.warpRef.command(this.nodeUri, Uri.parse("connectionOpen"), Value.absent());
   }
 
@@ -134,14 +136,15 @@ public class TwelveDataClient extends WebSocketClient {
   }
 
   @Override
-  public void onClose(int i, String s, boolean b) {
-
+  public void onClose(int code, String reason, boolean remote) {
+    log.warn("onClose() - code = {} remote = '{}' reason = '{}'", code, remote, reason);
   }
 
   @Override
   public void onError(Exception e) {
-    log.error("Exception thrown", e);
+    log.error("onError() - Exception thrown", e);
   }
+
 
 
   Set<String> ignore = Set.of("nodeUri", "lane");
@@ -151,6 +154,7 @@ public class TwelveDataClient extends WebSocketClient {
     log.info("processRequest() - requestUri = '{}'", requestUri);
     Uri uri = requestUri.appendedQuery()
         .appendedQuery("apikey", this.token);
+
 
     HttpRequest request = HttpRequest.newBuilder(URI.create(uri.toString()))
         .GET()
@@ -184,7 +188,7 @@ public class TwelveDataClient extends WebSocketClient {
     try {
       processRequest(requestUri, input);
     } catch (Exception e) {
-      log.error("Exception while calling api", e);
+      log.error("Exception while calling eod api", e);
     }
 
   }
