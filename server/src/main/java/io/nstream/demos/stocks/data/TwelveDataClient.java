@@ -213,7 +213,7 @@ public class TwelveDataClient extends WebSocketClient {
       input.forEach(item -> {
         String symbol = item.stringValue();
         Uri symbolPath = Uri.parse("/")
-            .appendedPath("symbol")
+            .appendedPath("stock")
             .appendedPath(symbol);
         Value eodValue = response.get(symbol);
         this.warpRef.command(symbolPath, Uri.parse("updatePreviousClose"), eodValue);
