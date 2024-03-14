@@ -5,10 +5,9 @@ import org.slf4j.LoggerFactory;
 import swim.api.SwimLane;
 import swim.api.agent.AbstractAgent;
 import swim.api.lane.CommandLane;
-import swim.api.lane.ValueLane;
-import swim.concurrent.TimerRef;
 import swim.structure.Item;
 import swim.structure.Value;
+import swim.uri.Uri;
 import swim.util.Builder;
 
 import java.util.ArrayList;
@@ -36,6 +35,14 @@ public class TwelveDataApiAgent extends AbstractAgent {
     if (null == token) {
       throw new IllegalStateException("Environment Variable TOKEN must be configured.");
     }
+
+    Value symbols = getProp("symbols");
+    symbols.forEach(symbol -> {
+      Uri stockUri = Uri.parse("/")
+          .appendedPath("stock")
+          .appendedPath(symbol.stringValue());
+      this.command(stockUri, Uri.parse("init"), Value.empty());
+    });
 
     this.client = new TwelveDataClient(this, this.nodeUri(), token);
     log.info("Connecting to twelvedata");
@@ -92,7 +99,7 @@ public class TwelveDataApiAgent extends AbstractAgent {
   @SwimLane("eod")
   final CommandLane<Value> eod = this.<Value>commandLane()
       .onCommand(input -> {
-        this.executor.submit(()-> {
+        this.executor.submit(() -> {
           this.client.eod(input);
         });
       });

@@ -27,55 +27,61 @@ public class StockAgent extends AbstractAgent {
   @SwimLane("previousClose")
   final ValueLane<Value> previousClose = this.valueLane();
 
+  @SwimLane("init")
+  final CommandLane<Value> init = this.<Value>commandLane()
+      .onCommand(input -> {
+
+      });
+
   @SwimLane("updatePreviousClose")
   final CommandLane<Value> updatePreviousClose = this.<Value>commandLane()
       .onCommand(input -> this.previousClose.set(input));
-
-
-  TimerRef previousCloseTimer;
-
-  private static final long previousCloseInterval = Duration.ofMinutes(15).toMillis();
-
-  static LocalDate lastWeekDay() {
-    LocalDate result = LocalDate.now(ZoneId.of("America/New_York"))
-        .minusDays(1);
-
-    while(DayOfWeek.SATURDAY == result.getDayOfWeek() || DayOfWeek.SUNDAY == result.getDayOfWeek()) {
-      result = result.minusDays(1);
-    }
-
-    return result;
-  }
-
-  void requestPreviousClose() {
-    Value previousClose = this.previousClose.get();
-
-    if(previousClose.isDefined()) {
-      Value datetimeValue = previousClose.getSlot("datetime");
-      if(datetimeValue.isDefined()) {
-        LocalDate closeDate = LocalDate.parse(datetimeValue.stringValue());
-        LocalDate yesterday = lastWeekDay();
-        if(yesterday.equals(closeDate)) {
-          this.previousCloseTimer = this.setTimer(
-              previousCloseInterval,
-              this::requestPreviousClose
-          );
-          return;
-        }
-      }
-    }
-
-    Record request = Record.of()
-        .slot("symbol", getProp("symbol"))
-        .slot("nodeUri", nodeUri().toString())
-        .slot("lane", "updatePreviousClose");
-    command("/adapter/twelvedata", "eod", request);
-
-    this.previousCloseTimer = this.setTimer(
-        previousCloseInterval,
-        this::requestPreviousClose
-    );
-  }
+//
+//
+//  TimerRef previousCloseTimer;
+//
+//  private static final long previousCloseInterval = Duration.ofMinutes(15).toMillis();
+//
+//  static LocalDate lastWeekDay() {
+//    LocalDate result = LocalDate.now(ZoneId.of("America/New_York"))
+//        .minusDays(1);
+//
+//    while(DayOfWeek.SATURDAY == result.getDayOfWeek() || DayOfWeek.SUNDAY == result.getDayOfWeek()) {
+//      result = result.minusDays(1);
+//    }
+//
+//    return result;
+//  }
+//
+//  void requestPreviousClose() {
+//    Value previousClose = this.previousClose.get();
+//
+//    if(previousClose.isDefined()) {
+//      Value datetimeValue = previousClose.getSlot("datetime");
+//      if(datetimeValue.isDefined()) {
+//        LocalDate closeDate = LocalDate.parse(datetimeValue.stringValue());
+//        LocalDate yesterday = lastWeekDay();
+//        if(yesterday.equals(closeDate)) {
+//          this.previousCloseTimer = this.setTimer(
+//              previousCloseInterval,
+//              this::requestPreviousClose
+//          );
+//          return;
+//        }
+//      }
+//    }
+//
+//    Record request = Record.of()
+//        .slot("symbol", getProp("symbol"))
+//        .slot("nodeUri", nodeUri().toString())
+//        .slot("lane", "updatePreviousClose");
+//    command("/adapter/twelvedata", "eod", request);
+//
+//    this.previousCloseTimer = this.setTimer(
+//        previousCloseInterval,
+//        this::requestPreviousClose
+//    );
+//  }
 
 
 
@@ -84,7 +90,7 @@ public class StockAgent extends AbstractAgent {
     this.status.set(Record.of());
     this.previousClose.set(Value.absent());
 
-    requestPreviousClose();
+//    requestPreviousClose();
     command("/symbols", "add", getProp("symbol"));
   }
 

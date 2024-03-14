@@ -1,5 +1,6 @@
 package io.nstream.demos.stocks.data;
 
+import io.nstream.demos.stocks.Utils;
 import io.nstream.demos.stocks.data.pricing.AbstractPricingHandler;
 import io.nstream.demos.stocks.data.pricing.PricingHandlerFactory;
 import org.java_websocket.client.WebSocketClient;
@@ -164,18 +165,22 @@ public class TwelveDataClient extends WebSocketClient {
 
   void processRequest(Uri requestUri, Value input) throws IOException, InterruptedException {
     log.info("processRequest() - requestUri = '{}'", requestUri);
-    Uri uri = requestUri.appendedQuery()
-        .appendedQuery("apikey", this.token);
-
-
-    HttpRequest request = HttpRequest.newBuilder(URI.create(uri.toString()))
-        .GET()
-        .build();
-    HttpResponse<String> response = this.httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-    Value value = Json.parse(response.body());
+    Value value = requestJson(requestUri);
     String nodeUri = input.getSlot("nodeUri").stringValue();
     String lane = input.getSlot("lane").stringValue();
     this.warpRef.command(nodeUri, lane, value);
+  }
+
+  private Value requestJson(Uri requestUri) throws IOException, InterruptedException {
+    Uri uri = requestUri.appendedQuery()
+        .appendedQuery("apikey", this.token);
+    HttpRequest request = HttpRequest.newBuilder(URI.create(uri.toString()))
+        .GET()
+        .build();
+    log.info("requestJson() - url = {}", uri);
+    HttpResponse<String> response = this.httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+    Value value = Json.parse(response.body());
+    return value;
   }
 
 
@@ -193,10 +198,26 @@ public class TwelveDataClient extends WebSocketClient {
   }
 
   public void eod(Value input) {
-    Uri requestUri = buildUri("eod", input);
+
+
+    Value symbols = Utils.join(input);
+
+    Value requestParams = Record.of()
+        .slot("symbol", symbols);
+
+    Uri requestUri = buildUri("eod", requestParams);
 
     try {
-      processRequest(requestUri, input);
+      Value response = requestJson(requestUri);
+
+      input.forEach(item -> {
+        String symbol = item.stringValue();
+        Uri symbolPath = Uri.parse("/")
+            .appendedPath("symbol")
+            .appendedPath(symbol);
+        Value eodValue = response.get(symbol);
+        this.warpRef.command(symbolPath, Uri.parse("updatePreviousClose"), eodValue);
+      });
     } catch (Exception e) {
       log.error("Exception while calling eod api", e);
     }
