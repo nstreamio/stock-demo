@@ -52,15 +52,19 @@ public class TwelveDataClient extends WebSocketClient {
   void sendKeepAlive() {
     ReadyState readyState = this.getReadyState();
 
-    if(readyState == ReadyState.OPEN) {
-      log.trace("sendKeepAlive() - sending heartbeat.");
-      sendValue(
-          Record.of()
-              .slot("action", "heartbeat")
-      );
-    } else if(readyState == ReadyState.CLOSED) {
-      log.warn("sendKeepAlive() - readyState = {}. Calling connect().", readyState);
-      this.connect();
+    try {
+      if (readyState == ReadyState.OPEN) {
+        log.trace("sendKeepAlive() - sending heartbeat.");
+        sendValue(
+            Record.of()
+                .slot("action", "heartbeat")
+        );
+      } else if (readyState == ReadyState.CLOSED) {
+        log.warn("sendKeepAlive() - readyState = {}. Calling connect().", readyState);
+        this.reconnect();
+      }
+    } catch (Exception ex) {
+      log.error("sendKeepAlive() - exception thrown", ex);
     }
   }
 
@@ -155,7 +159,6 @@ public class TwelveDataClient extends WebSocketClient {
   }
 
 
-
   Set<String> ignore = Set.of("nodeUri", "lane");
 
 
@@ -174,8 +177,6 @@ public class TwelveDataClient extends WebSocketClient {
     String lane = input.getSlot("lane").stringValue();
     this.warpRef.command(nodeUri, lane, value);
   }
-
-
 
 
   Uri buildUri(String path, Value input) {
