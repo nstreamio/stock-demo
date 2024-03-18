@@ -4,7 +4,7 @@ import { AgGridReact } from "ag-grid-react";
 import { CellStyle, ColDef, GridOptions, RowStyle } from "ag-grid-community";
 import { throttle } from "lodash-es";
 import { TableProps, Stock, StockRow, PriceChangeState, StockMeta } from "./Table.types";
-import { numValueFormatter } from "../../lib/helpers/numFormatting";
+import { numValueFormatter, pctValueFormatter, volumeValueFormatter } from "../../lib/helpers/formatting";
 import { StockForm } from "./StockForm";
 import { useMapDownlink } from "../../lib/hooks/useMapDownlink";
 import "ag-grid-community/styles/ag-grid.css";
@@ -52,10 +52,10 @@ const cellStyle: CellStyle = {
 };
 const headerClass = "text-center text-secondary dark:text-secondary-dark text-sm font-medium";
 const COLUMN_DEFS: ColDef[] = [
-  { field: "key", cellStyle, headerClass },
-  { field: "price", valueFormatter: numValueFormatter, cellStyle, headerClass, getQuickFilterText: () => '' },
-  { field: "volume", valueFormatter: numValueFormatter, cellStyle, headerClass, getQuickFilterText: () => '' },
-  { field: "movement", valueFormatter: numValueFormatter, cellStyle, headerClass, getQuickFilterText: () => '' },
+  { field: "key", headerName: "Symbol", cellStyle, headerClass },
+  { field: "price", headerName: "Price", valueFormatter: numValueFormatter, cellStyle, headerClass, getQuickFilterText: () => '' },
+  { field: "movement", headerName: "Movement", valueFormatter: pctValueFormatter, cellStyle, headerClass, getQuickFilterText: () => '' },
+  { field: "volume", headerName: "Volume (Millions)", valueFormatter: volumeValueFormatter, cellStyle, headerClass, getQuickFilterText: () => '' },
 ];
 
 export const Table: FC<TableProps> = (props) => {
