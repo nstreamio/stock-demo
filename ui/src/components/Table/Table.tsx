@@ -4,10 +4,10 @@ import { AgGridReact } from "ag-grid-react";
 import { CellStyle, ColDef, GridOptions, RowStyle } from "ag-grid-community";
 import { throttle } from "lodash-es";
 import { TableProps, Stock, StockRow, PriceChangeState, StockMeta } from "./Table.types";
-import { numValueFormatter } from "../../lib/helpers/numFormatting";
+import { numValueFormatter, pctValueFormatter, volumeValueFormatter } from "../../lib/helpers/formatting";
 import { StockForm } from "./StockForm";
-import "ag-grid-community/styles/ag-grid.css";
 import { useMapDownlink } from "../../lib/hooks/useMapDownlink";
+import "ag-grid-community/styles/ag-grid.css";
 
 const NEW_STOCK_METADATA: StockMeta = { timer: null, priceLastUpdated: 0, prevDisplayedPrice: 0 };
 const UPDATED_ROW_STYLE_DURATION_MS = 2000;
@@ -33,11 +33,13 @@ const hostUri: string = (() => {
 })();
 
 const getRowStyle: GridOptions<StockRow>["getRowStyle"] = (params) => {
+  const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
   const styles: RowStyle = {
-    backgroundColor: params.rowIndex % 2 === 0 ? "var(--app-background)" : "var(--row-background-secondary)",
+    backgroundColor: params.rowIndex % 2 === 0 ? `var(--app-bg${isDark ? "-dark" : ""})` : `var(--row-bg-secondary${isDark ? "-dark" : ""})`,
   };
   if (params?.data?.state != null) {
     styles.color = params.data.state === "falling" ? "var(--red-alert)" : "var(--green-alert)";
+    styles.fontWeight = 500;
   }
   return styles;
 };
@@ -48,12 +50,12 @@ const cellStyle: CellStyle = {
   justifyContent: "center",
   alignItems: "center ",
 };
-const headerClass = "text-center text-white/50 text-sm";
+const headerClass = "text-center text-secondary dark:text-secondary-dark text-sm font-medium";
 const COLUMN_DEFS: ColDef[] = [
-  { field: "key", cellStyle, headerClass },
-  { field: "price", valueFormatter: numValueFormatter, cellStyle, headerClass, getQuickFilterText: () => '' },
-  { field: "volume", valueFormatter: numValueFormatter, cellStyle, headerClass, getQuickFilterText: () => '' },
-  { field: "movement", valueFormatter: numValueFormatter, cellStyle, headerClass, getQuickFilterText: () => '' },
+  { field: "key", headerName: "Symbol", cellStyle, headerClass },
+  { field: "price", headerName: "Price", valueFormatter: numValueFormatter, cellStyle, headerClass, getQuickFilterText: () => '' },
+  { field: "movement", headerName: "Movement", valueFormatter: pctValueFormatter, cellStyle, headerClass, getQuickFilterText: () => '' },
+  { field: "volume", headerName: "Volume (Millions)", valueFormatter: volumeValueFormatter, cellStyle, headerClass, getQuickFilterText: () => '' },
 ];
 
 export const Table: FC<TableProps> = (props) => {
