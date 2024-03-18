@@ -4,10 +4,21 @@ export default {
   theme: {
     extend: {
       backgroundColor: {
-        app: "var(--app-background)",
-        "row-primary": "var(--app-background)",
-        "row-secondary": "var(--row-background-secondary)",
+        "app": "var(--app-bg)",
+        "row-primary": "var(--app-bg)",
+        "row-secondary": "#242424",
+        "app-dark": "var(--app-bg-dark)",
+        "row-primary-dark": "var(--app-bg)",
+        "row-secondary-dark": "var(--row-bg-secondary-dark)",
       },
+      textColor: {
+        primary: "#181818",
+        "primary-dark": "#FBFBFB",
+        secondary: "rgba(0, 0, 0, 0.5)",
+        "secondary-dark": "#DEDEDE",
+        logo: "#242424",
+        "logo-dark": "#F6F6F6",
+      }
     },
   },
   plugins: [],

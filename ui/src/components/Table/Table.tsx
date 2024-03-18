@@ -6,8 +6,8 @@ import { throttle } from "lodash-es";
 import { TableProps, Stock, StockRow, PriceChangeState, StockMeta } from "./Table.types";
 import { numValueFormatter } from "../../lib/helpers/numFormatting";
 import { StockForm } from "./StockForm";
-import "ag-grid-community/styles/ag-grid.css";
 import { useMapDownlink } from "../../lib/hooks/useMapDownlink";
+import "ag-grid-community/styles/ag-grid.css";
 
 const NEW_STOCK_METADATA: StockMeta = { timer: null, priceLastUpdated: 0, prevDisplayedPrice: 0 };
 const UPDATED_ROW_STYLE_DURATION_MS = 2000;
@@ -33,11 +33,13 @@ const hostUri: string = (() => {
 })();
 
 const getRowStyle: GridOptions<StockRow>["getRowStyle"] = (params) => {
+  const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
   const styles: RowStyle = {
-    backgroundColor: params.rowIndex % 2 === 0 ? "var(--app-background)" : "var(--row-background-secondary)",
+    backgroundColor: params.rowIndex % 2 === 0 ? `var(--app-bg${isDark ? "-dark" : ""})` : `var(--row-bg-secondary${isDark ? "-dark" : ""})`,
   };
   if (params?.data?.state != null) {
     styles.color = params.data.state === "falling" ? "var(--red-alert)" : "var(--green-alert)";
+    styles.fontWeight = 500;
   }
   return styles;
 };
@@ -48,7 +50,7 @@ const cellStyle: CellStyle = {
   justifyContent: "center",
   alignItems: "center ",
 };
-const headerClass = "text-center text-white/50 text-sm";
+const headerClass = "text-center text-secondary dark:text-secondary-dark text-sm font-medium";
 const COLUMN_DEFS: ColDef[] = [
   { field: "key", cellStyle, headerClass },
   { field: "price", valueFormatter: numValueFormatter, cellStyle, headerClass, getQuickFilterText: () => '' },
