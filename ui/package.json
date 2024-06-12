@@ -12,7 +12,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@swim/client": "4.0.0-dev.20230923",
+    "@swim/client": "4.0.0",
     "ag-grid-react": "31.0.3",
     "ag-grid-community": "31.0.3",
     "lodash-es": "^4.17.21",
